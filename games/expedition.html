@@ -316,7 +316,8 @@ function elbow(x1,y1,x2,y2,l1,l2,sg){const dx=x2-x1,dy=y2-y1,d=Math.hypot(dx,dy)
 /* Single streamed player; decoded buffers are not retained on mobile. */
 const Music=(()=>{
   const paths={interface:'../assets/audio/interface.mp3',battle:'../assets/audio/battle.mp3'};
-  let audio=null,gain=null,current='interface',loaded='',volume=.42,muted=false,suspended=false,pending=false,blocked=false,serial=0;
+  let audio=null,gain=null,current='interface',loaded='',volume=.42,ducked=false,muted=false,suspended=false,pending=false,blocked=false,serial=0;
+  const level=()=>volume*(ducked?.65:1);
   function stop(){serial++;pending=false;if(audio)audio.pause();}
   function sync(retry=false){
     if(!audio)return;
@@ -334,16 +335,17 @@ const Music=(()=>{
       if(!audio){
         if(!ac||!output)return;
         try{const a=document.createElement('audio');a.id='gameMusic';a.loop=true;a.preload='none';a.hidden=true;a.setAttribute('playsinline','');
-          const g=ac.createGain(),source=ac.createMediaElementSource(a);g.gain.value=volume;source.connect(g);g.connect(output);
+          const g=ac.createGain(),source=ac.createMediaElementSource(a);g.gain.value=level();source.connect(g);g.connect(output);
           document.body.appendChild(a);audio=a;gain=g;
         }catch(_){return;}
       }
       sync(true);
     },
-    scene(name){const next=name==='battle'?'battle':'interface';if(current===next)return;current=next;sync();},
+    scene(name,soft=false){const next=name==='battle'?'battle':'interface',duck=!!soft;if(current===next&&ducked===duck)return;
+      const changed=current!==next;current=next;ducked=duck;if(gain)gain.gain.value=level();if(changed)sync();},
     setMuted(value){muted=!!value;sync();},
     suspend(value){suspended=!!value;sync();},
-    setVolume(value){if(!Number.isFinite(value))return;volume=Math.max(0,Math.min(1,value));if(gain)gain.gain.value=volume;sync();}
+    setVolume(value){if(!Number.isFinite(value))return;volume=Math.max(0,Math.min(1,value));if(gain)gain.gain.value=level();sync();}
   };
 })();
 
@@ -1864,7 +1866,9 @@ const ROMAN=['','Ⅰ','Ⅱ','Ⅲ'];
 function renderRunes(){$('runeLine').innerHTML=RUNES.filter(r=>G.runes[r.id]).map(r=>'<span class="tag">'+r.glyph+(r.max>1?' '+ROMAN[G.runes[r.id]]:'')+'</span>').join('');}
 const uiC={};let lastUI=-1;
 function syncUI(force){
-  Music.scene(canRun()?'battle':'interface');
+  // A forge is an intermission in the same expedition, not a music restart.
+  const forgeMusic=G.state==='forge';
+  Music.scene(canRun()||forgeMusic?'battle':'interface',forgeMusic);
   const h=G.hero,S=G.S,hp=Math.max(0,Math.ceil(h.hp));
   if(force||hp!==uiC.hp||S.maxHp!==uiC.mx){uiC.hp=hp;uiC.mx=S.maxHp;$('hpFill').style.width=(hp/S.maxHp*100)+'%';uiText('hpTxt',hp+' / '+S.maxHp);}
   const lag=Math.round(h.hpLag);if(force||lag!==uiC.lag){uiC.lag=lag;$('hpLag').style.width=Math.min(100,lag/S.maxHp*100)+'%';}
