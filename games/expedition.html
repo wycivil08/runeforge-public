@@ -2225,7 +2225,7 @@ function labAction(v){
   click('trialPanelToggle',Trial.togglePanel);
   click('trialReset',()=>{if(G.trial)Trial.load(G.trial.id,G.trial.moving);});
   click('trialMotion',()=>{if(G.trial)Trial.load(G.trial.id,!G.trial.moving);});
-  $('trialPreset').addEventListener('change',()=>{if(!Trial.load($('trialPreset').value,false))Trial.ui();});
+  $('trialPreset').addEventListener('change',e=>{if(Trial.load(e.currentTarget.value,false))e.currentTarget.blur();else Trial.ui();});
   $('trialResults').addEventListener('toggle',()=>Trial.ui());
   click('btnTitle',()=>{reset();G.lab=false;G.state='title';Sfx.suspend(false);syncUI(true);for(const id of ['ovPause','ovEnd','ovForge','labBar'])show(id,false);show('ovTitle',true);});
   for(const [id,key,min,max] of [['labNormal','normalCap',1,200],['labElite','eliteCap',1,30],['labCD','cd',0,60]])$(id).addEventListener('change',()=>{Trial.custom();const v=Number($(id).value);if(Number.isFinite(v))G.labOptions[key]=key==='cd'?clamp(v,min,max):Math.round(clamp(v,min,max));$(id).value=G.labOptions[key];if(key==='cd'&&G.lab)for(const k of ORDER)G.hero.cooldowns[k]=Math.min(G.hero.cooldowns[k],G.labOptions.cd);});
