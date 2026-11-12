@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>符炉远征 · V0.3.1 · 骸潮远征</title>
+<title>符炉远征 · V0.3.2 · 骸潮远征</title>
 <style>
 :root{--ink:#0a090b;--bone:#d8ccb0;--dim:#978a6c;--edge:#5d543f;--gold:#bfa66a;--sl:env(safe-area-inset-left,0px);--sr:env(safe-area-inset-right,0px);--st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px)}
 *{box-sizing:border-box}
@@ -142,6 +142,12 @@ body.touch #btnPotion .keycap{display:none}
 @media (max-width:700px) and (max-height:480px) and (orientation:landscape){
  #labBar{left:50%;right:auto;transform:translateX(-50%);top:calc(112px + var(--st));max-height:max(80px,calc(100dvh - 126px - var(--st) - var(--sb)))}
 }
+/* Music controls live in menus, never over movement or combat controls. */
+.audioSettings{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin:12px 0 4px;font:12px system-ui;color:#b9ad8d}
+.audioSettings label{display:flex;align-items:center;gap:8px;min-height:44px}
+.audioSettings input{width:min(140px,35vw);min-height:44px;accent-color:#bfa66a;touch-action:pan-x}
+.audioSettings output{width:34px;text-align:right}
+.audioSettings button{min-height:44px}
 </style>
 </head>
 <body>
@@ -151,7 +157,7 @@ body.touch #btnPotion .keycap{display:none}
   <div class="row"><b id="waveTxt">—</b><i class="sep"></i><span class="lbl">余敌</span><b id="foes">0</b><i class="sep"></i><span class="lbl">斩杀</span><b id="kills">0</b><i class="sep"></i><span class="lbl">最佳连锁</span><b id="bestChain">×0</b></div>
   <div class="row"><span class="lbl">闪避</span><div id="dgBar"><div id="dgFill"></div></div><span id="runeLine"></span></div>
 </div>
-<div id="hudR" class="panel"><button id="btnPause">暂停</button><button id="btnSnd">音效：开</button></div>
+<div id="hudR" class="panel"><button id="btnPause">暂停</button><button id="btnSnd">声音：开</button></div>
 <div id="labBar" class="panel hidden">
   <span class="lbl">试验场</span>
   <button data-lab="m">骸卒 ×6</button><button data-lab="a">弓手 ×2</button><button data-lab="b">重甲 ×1</button><button data-lab="x">爆尸 ×3</button><button data-lab="e">破坏者 ×1</button>
@@ -167,11 +173,13 @@ body.touch #btnPotion .keycap{display:none}
 
 <div id="ovTitle" class="overlay"><div class="card panel">
   <h1>符炉远征</h1>
-  <div class="sub">RUNEFORGE EXPEDITION · V0.3.1 · 骸潮远征</div>
+  <div class="sub">RUNEFORGE EXPEDITION · V0.3.2 · 骸潮远征</div>
   <div class="txt"><strong>怪群不是你的敌人，是你的弹药。</strong><br>连斩第三击是<strong>终结击</strong>：把敌人打飞，撞向墙、石柱、尖刺，或者别的敌人。<br>一次出手撞到的越多，<strong>连锁</strong>越高，战技冷却返还越多。<br>连破七波，在第八波击碎「炉心骸王」。每破一波，免费恢复生命与一瓶血药，再选成长符文。<br><strong>五倍骸潮 · 500 生命 · 开局旋风斩。</strong> 血瓶瞬回 30% 生命，2 瓶储备，每 25 秒战斗回充一瓶，击杀加速回充。<br>断柱与低矮残墙堆都能承接撞击，中央通道保持开阔。</div>
   <div class="txt dim">键鼠：WASD 移动 · 鼠标瞄准（决定击飞方向）· 左键连斩 · 空格闪避 · 1–4 战技 · Q 血瓶 · P 暂停<br>触屏：左摇杆移动 · 斩 / 避 / 血瓶 · 战技自动瞄准最近敌人</div>
   <div class="modes"><button class="modeBtn" data-mode="kb">键鼠操作</button><button class="modeBtn" data-mode="touch">触屏操作</button></div>
   <button id="btnStart" class="big">踏入远征</button><button id="btnOathT" class="big hidden"></button><button id="btnLab" class="big">撞击试验场</button>
+  <div class="audioSettings"><button type="button" data-audio-toggle aria-pressed="false">声音：开</button><label for="musicVolumeTitle">音乐<input id="musicVolumeTitle" data-music-volume type="range" min="0" max="100" step="1" value="42"><output>42%</output></label></div>
+  <div class="dim">点击或按键后播放音乐 · M 切换声音</div>
   <div class="dim" id="bestTxt" style="margin-top:8px"></div>
 
 </div></div>
@@ -180,6 +188,7 @@ body.touch #btnPotion .keycap{display:none}
   <h2>暂 停</h2>
   <div class="txt" id="pauseWhy"></div>
   <div id="pauseRunes"></div>
+  <div class="audioSettings"><button type="button" data-audio-toggle aria-pressed="false">声音：开</button><label for="musicVolumePause">音乐<input id="musicVolumePause" data-music-volume type="range" min="0" max="100" step="1" value="42"><output>42%</output></label></div>
   <button id="btnResume" class="big">继续</button><button id="btnRestartP" class="big">重新开始</button>
   <div class="modes"><button id="btnMode">操作：键鼠</button><button id="btnShake">震动：开</button><button id="btnTitle">返回标题</button></div>
 </div></div>
@@ -198,9 +207,9 @@ body.touch #btnPotion .keycap{display:none}
 </div></div>
 
 <script>
-/* 符炉远征 · V0.3.1 · 骸潮远征（RUNEFORGE-HORDE-01）
+/* 符炉远征 · V0.3.2 · 骸潮远征（RUNEFORGE-HORDE-01）
    基于远征单文件增量开发：击飞 → 飞行 → 撞击 → 余波 管线、有界竞技场、连锁返还冷却、爆尸、破势、试验场入口。
-   单文件、无外部依赖、无网络请求。全部画面与音效均为代码生成。
+   单文件游戏逻辑与代码生成画面/战斗音效；背景音乐读取同站点两份 MP3，不请求外部服务。
    调参入口：CFG.launch / CFG.arena / SKILLS / WAVES。 */
 (()=>{
 'use strict';
@@ -304,6 +313,40 @@ function segDist(px,py,ax,ay,bx,by){const dx=bx-ax,dy=by-ay,l2=dx*dx+dy*dy||1e-6
 function elbow(x1,y1,x2,y2,l1,l2,sg){const dx=x2-x1,dy=y2-y1,d=Math.hypot(dx,dy)||1e-4;const dm=Math.min(d,l1+l2-.01);const a=(l1*l1-l2*l2+dm*dm)/(2*dm);const hh=Math.sqrt(Math.max(0,l1*l1-a*a));const ux=dx/d,uy=dy/d;return[x1+ux*a-uy*hh*sg,y1+uy*a+ux*hh*sg];}
 
 /* ================= 3. 音频（WebAudio 程序化） ================= */
+/* Single streamed player; decoded buffers are not retained on mobile. */
+const Music=(()=>{
+  const paths={interface:'../assets/audio/interface.mp3',battle:'../assets/audio/battle.mp3'};
+  let audio=null,gain=null,current='interface',loaded='',volume=.42,muted=false,suspended=false,pending=false,blocked=false,serial=0;
+  function stop(){serial++;pending=false;if(audio)audio.pause();}
+  function sync(retry=false){
+    if(!audio)return;
+    if(muted||suspended||volume===0||document.hidden){stop();return;}
+    if(loaded!==current){stop();loaded=current;audio.src=paths[current];audio.load();blocked=false;}
+    if((blocked&&!retry)||pending||!audio.paused)return;
+    const ticket=++serial;pending=true;blocked=false;
+    try{const p=audio.play();
+      if(p&&p.then)p.then(()=>{if(ticket===serial)pending=false;},()=>{if(ticket===serial){pending=false;blocked=true;}});
+      else pending=false;
+    }catch(_){pending=false;blocked=true;}
+  }
+  return{
+    unlock(ac,output){
+      if(!audio){
+        if(!ac||!output)return;
+        try{const a=document.createElement('audio');a.id='gameMusic';a.loop=true;a.preload='none';a.hidden=true;a.setAttribute('playsinline','');
+          const g=ac.createGain(),source=ac.createMediaElementSource(a);g.gain.value=volume;source.connect(g);g.connect(output);
+          document.body.appendChild(a);audio=a;gain=g;
+        }catch(_){return;}
+      }
+      sync(true);
+    },
+    scene(name){const next=name==='battle'?'battle':'interface';if(current===next)return;current=next;sync();},
+    setMuted(value){muted=!!value;sync();},
+    suspend(value){suspended=!!value;sync();},
+    setVolume(value){if(!Number.isFinite(value))return;volume=Math.max(0,Math.min(1,value));if(gain)gain.gain.value=volume;sync();}
+  };
+})();
+
 const Sfx=(()=>{
   let ac=null,master=null,nbuf=null,muted=false,wantSuspend=false;const volume=.65;
   const live=new Map(),last={};
@@ -316,6 +359,7 @@ const Sfx=(()=>{
         nbuf=ac.createBuffer(1,Math.floor(ac.sampleRate*1.5),ac.sampleRate);const d=nbuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
         startAmb();}catch(err){ac=null;return;}}
     if(wantSuspend){if(ac.state==='running')halt();}else if(ac.state!=='running')resume();
+    Music.unlock(ac,master);
   }
   function startAmb(){const s=ac.createBufferSource();s.buffer=nbuf;s.loop=true;const f=ac.createBiquadFilter();f.type='lowpass';f.frequency.value=230;
     const g=ac.createGain();g.gain.value=.045;const lfo=ac.createOscillator();lfo.frequency.value=.07;const lg=ac.createGain();lg.gain.value=70;
@@ -332,9 +376,9 @@ const Sfx=(()=>{
     const g=ac.createGain();env(g,t,o.vol,o.atk||.004,o.dur);os.connect(g);g.connect(master);os.start(t);os.stop(t+o.dur+.03);keep(os,g);}
   function ok(name,gap){if(!ac||muted||ac.state!=='running')return false;const t=ac.currentTime;if(last[name]!==undefined&&t-last[name]<gap)return false;last[name]=t;return true;}
   return{unlock,
-    setMuted(m){muted=m;if(m)clearVoices();if(master)master.gain.value=m?0:volume;},
+    setMuted(m){muted=m;if(m)clearVoices();if(master)master.gain.value=m?0:volume;Music.setMuted(m);},
     isMuted(){return muted;},
-    suspend(b){wantSuspend=b;if(b)clearVoices();if(!ac)return;if(b)halt();else resume();},
+    suspend(b){wantSuspend=b;Music.suspend(b);if(b)clearVoices();if(!ac)return;if(b)halt();else resume();},
     stopAll(){clearVoices();},
     swing(){if(!ok('sw',.05))return;const p=rand(.92,1.1);noise({dur:.2,f0:380*p,f1:2600*p,q:1.1,vol:.34,atk:.055});noise({dur:.15,type:'lowpass',f0:520,f1:190,vol:.13,atk:.03});},
     hit(crit,kill,brute){if(!ok('hit',.025))return;const p=rand(.9,1.12);
@@ -1820,6 +1864,7 @@ const ROMAN=['','Ⅰ','Ⅱ','Ⅲ'];
 function renderRunes(){$('runeLine').innerHTML=RUNES.filter(r=>G.runes[r.id]).map(r=>'<span class="tag">'+r.glyph+(r.max>1?' '+ROMAN[G.runes[r.id]]:'')+'</span>').join('');}
 const uiC={};let lastUI=-1;
 function syncUI(force){
+  Music.scene(canRun()?'battle':'interface');
   const h=G.hero,S=G.S,hp=Math.max(0,Math.ceil(h.hp));
   if(force||hp!==uiC.hp||S.maxHp!==uiC.mx){uiC.hp=hp;uiC.mx=S.maxHp;$('hpFill').style.width=(hp/S.maxHp*100)+'%';uiText('hpTxt',hp+' / '+S.maxHp);}
   const lag=Math.round(h.hpLag);if(force||lag!==uiC.lag){uiC.lag=lag;$('hpLag').style.width=Math.min(100,lag/S.maxHp*100)+'%';}
@@ -1967,8 +2012,8 @@ function setPause(p,auto){
   }
 }
 function loseFocus(){Input.reset();if(canRun())setPause(true,true);else if(!G.paused)Sfx.suspend(true);}
-function gainFocus(){Input.reset();if(!G.paused&&!document.hidden&&G.state!=='dead')Sfx.suspend(false);}
-function toggleMute(){const m=!Sfx.isMuted();Sfx.setMuted(m);const b=$('btnSnd');b.textContent='音效：'+(m?'关':'开');b.classList.toggle('off',m);}
+function gainFocus(){Input.reset();if(!G.paused&&!document.hidden)Sfx.suspend(false);}
+function toggleMute(){const m=!Sfx.isMuted();Sfx.setMuted(m);for(const b of[$('btnSnd'),...document.querySelectorAll('[data-audio-toggle]')]){b.textContent='声音：'+(m?'关':'开');b.classList.toggle('off',m);b.setAttribute('aria-pressed',String(m));}}
 function sampleControls(){
   const c={mx:0,my:0,aim:null,attack:false,dodge:false,skill:null},st=Input.st,K=Input.keys;
   const dq=st.dodgeQ,sq=st.skillQ;st.dodgeQ=false;st.skillQ=null;
@@ -2011,7 +2056,7 @@ function update(rdt){
   updateAftermath(dt,rdt);updateFx(dt,rdt);updateCamera(rdt);
   if(G.state==='dying'){
     G.deadClock+=rdt;G.timeScale=Math.min(1,.35+G.deadClock*.5);
-    if(G.deadClock>=3){G.state='dead';G.timeScale=1;Sfx.stopAll();Sfx.suspend(true);showEnd(false);}
+    if(G.deadClock>=3){G.state='dead';G.timeScale=1;Sfx.stopAll();showEnd(false);}
   }else if(G.state==='won'){
     G.endClock+=rdt;G.timeScale=Math.min(1,.3+G.endClock*.4);
     if(G.endClock>=3.2){G.state='win';G.timeScale=1;Input.reset();showEnd(true);}
@@ -2041,11 +2086,11 @@ function labAction(v){
   Input.init({canvas,joy:$('joy'),joyBase:$('joyBase'),knob:$('joyKnob'),atk:$('btnAtk'),dodge:$('btnDodge'),
     onAction:()=>Sfx.unlock(),
     onKey:c=>{
+      if(c==='KeyM'){toggleMute();return;}
       if(G.state==='forge'){if(/^Digit[1-3]$/.test(c))takeRune(Number(c.slice(-1))-1);return;}
       if(c==='KeyQ'){usePotion();return;}
       if(/^Digit[1-4]$/.test(c)){requestSkill(ORDER[Number(c.slice(-1))-1]);return;}
       if(c==='KeyP'||c==='Escape'){if(G.paused)setPause(false);else setPause(true,false);}
-      else if(c==='KeyM')toggleMute();
       else if(c==='KeyR'){if(G.state==='dead'||G.state==='win')start(G.oath,G.lab);}
       else if(c==='Enter'){if(G.paused)setPause(false);else if(G.state==='title')start(0);else if(G.state==='dead'||G.state==='win')start(G.oath,G.lab);}
     },
@@ -2054,7 +2099,7 @@ function labAction(v){
   click('btnPotion',usePotion);
   click('btnStart',()=>start(0));
   click('btnLab',()=>start(0,true));
-  click('btnTitle',()=>{reset();G.lab=false;G.state='title';for(const id of ['ovPause','ovEnd','ovForge','labBar'])show(id,false);show('ovTitle',true);});
+  click('btnTitle',()=>{reset();G.lab=false;G.state='title';Sfx.suspend(false);syncUI(true);for(const id of ['ovPause','ovEnd','ovForge','labBar'])show(id,false);show('ovTitle',true);});
   for(const [id,key,min,max] of [['labNormal','normalCap',1,200],['labElite','eliteCap',1,30],['labCD','cd',0,60]])$(id).addEventListener('change',()=>{const v=Number($(id).value);if(Number.isFinite(v))G.labOptions[key]=key==='cd'?clamp(v,min,max):Math.round(clamp(v,min,max));$(id).value=G.labOptions[key];if(key==='cd'&&G.lab)for(const k of ORDER)G.hero.cooldowns[k]=Math.min(G.hero.cooldowns[k],G.labOptions.cd);});
   document.querySelectorAll('[data-lab]').forEach(b=>b.addEventListener('click',()=>{labAction(b.dataset.lab);b.blur();}));
   click('btnOathT',e=>start(Number(e.currentTarget.dataset.o)||0));
@@ -2074,6 +2119,14 @@ function labAction(v){
   try{const best=Number(localStorage.getItem('rf_best'))||0;
     if(best>0){uiText('bestTxt','已完成远征 · 可挑战铁誓 '+best+'（敌人生命 +'+best*30+'%，伤害 +'+best*25+'%）');const b=$('btnOathT');b.textContent='以铁誓 '+best+' 出征';b.dataset.o=String(best);b.classList.remove('hidden');}
   }catch(_){}
+  // Every real pointer/key interaction may retry browser-blocked playback.
+  document.addEventListener('pointerdown',()=>Sfx.unlock(),{capture:true,passive:true});
+  document.addEventListener('keydown',()=>Sfx.unlock(),{capture:true});
+  document.querySelectorAll('[data-audio-toggle]').forEach(b=>b.addEventListener('click',()=>{Sfx.unlock();toggleMute();b.blur();}));
+  const sliders=document.querySelectorAll('[data-music-volume]');
+  const musicLevel=value=>{const n=Math.max(0,Math.min(100,Number(value)));if(!Number.isFinite(n))return;Music.setVolume(n/100);for(const el of sliders){el.value=String(n);el.nextElementSibling.textContent=n+'%';}try{localStorage.setItem('rf_music_volume',String(n));}catch(_){}};
+  for(const el of sliders)el.addEventListener('input',()=>{Sfx.unlock();musicLevel(el.value);});
+  try{const saved=localStorage.getItem('rf_music_volume');if(saved!==null&&saved!=='')musicLevel(saved);}catch(_){}
   renderRunes();syncUI(true);
   requestAnimationFrame(ts=>{lastTs=ts;requestAnimationFrame(frame);});
 })();
