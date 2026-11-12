@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>符炉远征 · V0.3 · 撞击远征</title>
+<title>符炉远征 · V0.3.1 · 骸潮远征</title>
 <style>
 :root{--ink:#0a090b;--bone:#d8ccb0;--dim:#978a6c;--edge:#5d543f;--gold:#bfa66a;--sl:env(safe-area-inset-left,0px);--sr:env(safe-area-inset-right,0px);--st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px)}
 *{box-sizing:border-box}
@@ -117,6 +117,17 @@ h2{margin:0 0 8px;font-size:25px;letter-spacing:8px;color:#d9c592}
  .skillBtn{width:21vw;max-width:92px}
 }
 @media (max-height:480px) and (min-width:701px){#bossHud{top:calc(8px + var(--st));width:240px}#banner{top:calc(74px + var(--st))}#msg{top:calc(130px + var(--st))}body.touch #skills{bottom:calc(98px + var(--sb))}body.touch .skillBtn{height:50px}}
+/* Flask: a separate reachable target, clear of movement, combat and lab controls. */
+#btnPotion{position:fixed;left:calc(50% + 224px);bottom:calc(18px + var(--sb));width:84px;height:76px;z-index:11;padding:8px 4px 3px;color:#b0ebbd;border-color:#102218;background:linear-gradient(180deg,#284635,#12271c);box-shadow:0 0 0 1px #728e6e;touch-action:manipulation}
+#btnPotion strong,#btnPotion small{display:block;color:#b0ebbd;font-size:12px;line-height:1.25}
+#btnPotion small{font-size:10px;color:#a1b89c}
+#btnPotion:disabled{opacity:.55;cursor:default}
+@media (max-width:700px){#btnPotion{left:calc(14px + var(--sl));bottom:calc(110px + var(--sb));width:76px;height:64px}}
+body.touch #btnPotion{left:calc(14px + var(--sl));bottom:calc(246px + var(--sb));width:72px;height:60px}
+body.touch #btnPotion .keycap{display:none}
+@media (max-height:480px) and (orientation:landscape){
+ body.touch #btnPotion{left:calc(50% + 12px);top:calc(12px + var(--st));bottom:auto;width:76px;height:56px}
+}
 /* Narrow lab: below the HUD, above the touch controls; scroll without shrinking buttons. */
 @media (max-width:700px){
  #labBar{top:calc(120px + var(--st));max-height:max(0px,calc(100dvh - 370px - var(--st) - var(--sb)));overflow-y:auto;touch-action:pan-y}
@@ -136,7 +147,7 @@ h2{margin:0 0 8px;font-size:25px;letter-spacing:8px;color:#d9c592}
 <body>
 <canvas id="game"></canvas>
 <div id="hudL" class="panel">
-  <div class="row"><span class="lbl">生命</span><div id="hpBar"><div id="hpLag"></div><div id="hpFill"></div></div><b id="hpTxt">100</b></div>
+  <div class="row"><span class="lbl">生命</span><div id="hpBar"><div id="hpLag"></div><div id="hpFill"></div></div><b id="hpTxt">500</b></div>
   <div class="row"><b id="waveTxt">—</b><i class="sep"></i><span class="lbl">余敌</span><b id="foes">0</b><i class="sep"></i><span class="lbl">斩杀</span><b id="kills">0</b><i class="sep"></i><span class="lbl">最佳连锁</span><b id="bestChain">×0</b></div>
   <div class="row"><span class="lbl">闪避</span><div id="dgBar"><div id="dgFill"></div></div><span id="runeLine"></span></div>
 </div>
@@ -151,13 +162,14 @@ h2{margin:0 0 8px;font-size:25px;letter-spacing:8px;color:#d9c592}
 <div id="msg"></div><div id="chainTxt" style="position:fixed;top:100px;left:50%;transform:translateX(-50%);color:#ffe08b;z-index:16;pointer-events:none"></div>
 <div id="hint"></div>
 <div id="skills" class="panel"></div>
+<button id="btnPotion" class="hidden" type="button" aria-label="血瓶，Q，回复30%最大生命" title="Q：血瓶回复30%生命；每25秒战斗回充，击杀减0.25秒"><span class="keycap">Q</span><span>血瓶</span><strong id="potionCount">2 / 2</strong><small id="potionCd">满瓶</small></button>
 <div id="touchUI"><div id="joy"><div id="joyBase"><div id="joyKnob"></div></div></div><div id="btnDodge" class="tbtn">避</div><div id="btnAtk" class="tbtn">斩</div></div>
 
 <div id="ovTitle" class="overlay"><div class="card panel">
   <h1>符炉远征</h1>
-  <div class="sub">RUNEFORGE EXPEDITION · V0.3 · 撞击远征</div>
-  <div class="txt"><strong>怪群不是你的敌人，是你的弹药。</strong><br>连斩第三击是<strong>终结击</strong>：把敌人打飞，撞向墙、石柱、尖刺，或者别的敌人。<br>一次出手撞到的越多，<strong>连锁</strong>越高，战技冷却返还越多。<br>连破七波，在第八波击碎「炉心骸王」。每破一波，符炉三选一。</div>
-  <div class="txt dim">键鼠：WASD 移动 · 鼠标瞄准（决定击飞方向）· 左键连斩 · 空格闪避 · 1–4 战技 · P 暂停<br>触屏：左摇杆移动 · 斩 / 避 · 战技自动瞄准最近敌人</div>
+  <div class="sub">RUNEFORGE EXPEDITION · V0.3.1 · 骸潮远征</div>
+  <div class="txt"><strong>怪群不是你的敌人，是你的弹药。</strong><br>连斩第三击是<strong>终结击</strong>：把敌人打飞，撞向墙、石柱、尖刺，或者别的敌人。<br>一次出手撞到的越多，<strong>连锁</strong>越高，战技冷却返还越多。<br>连破七波，在第八波击碎「炉心骸王」。每破一波，免费恢复生命与一瓶血药，再选成长符文。<br><strong>五倍骸潮 · 500 生命 · 开局旋风斩。</strong> 血瓶瞬回 30% 生命，2 瓶储备，每 25 秒战斗回充一瓶，击杀加速回充。<br>断柱与低矮残墙堆都能承接撞击，中央通道保持开阔。</div>
+  <div class="txt dim">键鼠：WASD 移动 · 鼠标瞄准（决定击飞方向）· 左键连斩 · 空格闪避 · 1–4 战技 · Q 血瓶 · P 暂停<br>触屏：左摇杆移动 · 斩 / 避 / 血瓶 · 战技自动瞄准最近敌人</div>
   <div class="modes"><button class="modeBtn" data-mode="kb">键鼠操作</button><button class="modeBtn" data-mode="touch">触屏操作</button></div>
   <button id="btnStart" class="big">踏入远征</button><button id="btnOathT" class="big hidden"></button><button id="btnLab" class="big">撞击试验场</button>
   <div class="dim" id="bestTxt" style="margin-top:8px"></div>
@@ -186,7 +198,7 @@ h2{margin:0 0 8px;font-size:25px;letter-spacing:8px;color:#d9c592}
 </div></div>
 
 <script>
-/* 符炉远征 · V0.3 · 撞击远征（RUNEFORGE-COLLISION-01）
+/* 符炉远征 · V0.3.1 · 骸潮远征（RUNEFORGE-HORDE-01）
    基于远征单文件增量开发：击飞 → 飞行 → 撞击 → 余波 管线、有界竞技场、连锁返还冷却、爆尸、破势、试验场入口。
    单文件、无外部依赖、无网络请求。全部画面与音效均为代码生成。
    调参入口：CFG.launch / CFG.arena / SKILLS / WAVES。 */
@@ -195,15 +207,17 @@ h2{margin:0 0 8px;font-size:25px;letter-spacing:8px;color:#d9c592}
 /* ================= 1. 配置 ================= */
 const CFG={
   world:{w:1440,h:960,chunk:400,cell:50,res:1.5,maxChunks:36},
-  /* 竞技场：墙厚、石柱[x,y,高,残破]、火盆（有碰撞）、壁灯（无碰撞光源）、尖刺墙段（side: n/s/w/e，a→b 为沿墙坐标） */
+  /* 竞技场：墙厚、石柱[x,y,高,残破]、低矮残墙堆[x,y,半径]、火盆（有碰撞）、壁灯（无碰撞光源）、尖刺墙段（side: n/s/w/e，a→b 为沿墙坐标） */
   arena:{wall:26,
-    pillars:[[430,300,58,0],[1010,300,44,1],[430,670,40,1],[1010,670,60,0],[720,190,50,1]],
+    pillars:[[430,300,58,0],[1010,300,44,1],[430,670,40,1],[1010,670,60,0],[720,190,50,1],
+      [600,340,30,1],[850,620,28,1],[720,780,24,1]],
+    rubble:[[180,430,26],[1260,520,26]],
     braziers:[[250,215],[1190,215],[250,745],[1190,745]],
     torches:[[180,14],[480,14],[960,14],[1260,14],[180,946],[400,946],[1040,946],[1260,946],[14,160],[14,800],[1426,160],[1426,800]],
     spikes:[{side:'e',a:300,b:660},{side:'w',a:340,b:620},{side:'s',a:560,b:880}]},
   view:{base:560,minBase:.95},loop:{maxDt:.05,stall:.5},
-  hero:{r:15,speed:176,blade:60,hipZ:9,bodyZ:17,headZ:27},
-  atk:{windup:.16,windupChain:.12,swing:.14,recover:.28,chainAt:.1,dmgMin:16,dmgMax:22,lunge:170,buffer:.2,knock:190},
+  hero:{r:15,speed:176,blade:72,hipZ:9,bodyZ:17,headZ:27},
+  atk:{windup:.16,windupChain:.12,swing:.14,recover:.28,chainAt:.1,dmgMin:26,dmgMax:35,lunge:170,buffer:.2,knock:190},
   dodge:{time:.26,speed:520,inv:.24},
   enemy:{maxAttackers:3,arc:1.0,reach:24,bruteReach:30,dieTime:.36,maxShooters:2,maxProjectiles:30},
   /* —— 撞击管线的全部关键参数（均为未经实测的初始值） —— */
@@ -211,32 +225,34 @@ const CFG={
     finEvery:3,finDmg:1.6,finWindup:.05,comboReset:.6,      // 普攻：每 finEvery 击为终结击
     finSpeed:640,aimBias:.72,medMul:.72,                    // 终结击初速 / 瞄准方向权重 / 中型初速系数
     drag:2.3,endSpeed:95,minImpact:150,minCarry:210,refSpeed:620,pad:2,
-    ramDmg:26,selfDmg:9,heavyMul:1.7,transfer:.55,keep:.62,keepHeavy:.86,
-    wallDmg:34,postDmg:30,spikeDmg:150,wallStun:.9,anvilStun:.6,downTime:.45,
+    ramDmg:33,selfDmg:11,heavyMul:1.7,transfer:.55,keep:.62,keepHeavy:.86,
+    wallDmg:43,postDmg:38,spikeDmg:150,wallStun:.9,anvilStun:.6,downTime:.45,
     ramStun:.6,ramBreak:3,
     poiseHit:25,poiseDecay:3,breakTime:3,breakDmg:.4,       // 破势（精英 / Boss）
     refund:.3,refundCap:3.5,                                // 连锁返还冷却：每次撞击返还秒数 / 单次出手上限
     fuse:.9,deathFuse:.55,boomRange:92,boomDmg:55,boomSpeed:460,boomHero:16,boomHeroK:.8,
     shardRange:95,echoRange:100,echoDmg:14,echoSpeed:520,
     fireGap:30,fireR:20,fireLife:3,fireTick:.4,fireDmg:7,maxFires:40,
-    bossSupply:7,bossAmmo:5,labCap:50
+    bossSupply:7,bossAmmo:25,labCap:50
   },
-  forge:{heal:10,mend:45,mendBelow:.6},
+  forge:{heal:.2,floor:.6,mend:.45},
+  potion:{max:2,heal:.3,recharge:25,killCredit:.25},
+  horde:{batch:6,interval:.2,first:.3},
   fx:{maxParticles:220,maxDebris:150,maxNumbers:40,maxTrail:90,maxFlashes:12,maxVoices:48,maxSkillFx:24,stopHit:.045,stopCrit:.075,stopKill:.06,stopCap:.13,dark:.84}
 };
 const ORDER=['shock','cleave','whirl','leap'];
 /* launch：可击飞的最大重量级（1 轻 / 2 中）；speed：击飞初速；aimBias：0 = 径向，1 = 完全沿瞄准方向 */
 const SKILLS={
-  shock:{name:'震荡波',role:'推墙',key:'1',cd:5,windup:.18,recover:.24,range:125,damage:16,stun:.6,knockback:160,launch:1,speed:640,aimBias:0},
-  cleave:{name:'破甲重斩',role:'发射',key:'2',cd:6,windup:.42,active:.12,recover:.3,range:140,halfAngle:.52,damage:64,armoredMul:1.45,controlledMul:1.25,breakTime:3,stun:.5,knockback:300,launch:2,speed:900,aimBias:.85},
-  whirl:{name:'旋风斩',role:'聚拢',key:'3',cd:8,windup:.15,duration:1.4,recover:.16,range:88,tick:.2,damage:5,stun:.32,move:.62,knockback:0,pullRange:175,pullSpeed:300,pullAhead:54,gatherStun:.8},
-  leap:{name:'跃击',role:'落点',key:'4',cd:8,windup:.18,flight:.48,recover:.2,distance:260,minDistance:40,range:90,damage:28,stun:.5,knockback:200,launch:1,speed:560,aimBias:0}
+  shock:{name:'震荡波',role:'推墙',key:'1',cd:4.5,windup:.18,recover:.24,range:150,damage:26,stun:.6,knockback:160,launch:1,speed:640,aimBias:0},
+  cleave:{name:'破甲重斩',role:'发射',key:'2',cd:5.5,windup:.42,active:.12,recover:.3,range:168,halfAngle:.52,damage:104,armoredMul:1.45,controlledMul:1.25,breakTime:3,stun:.5,knockback:300,launch:2,speed:900,aimBias:.85},
+  whirl:{name:'旋风斩',role:'聚拢',key:'3',cd:7,windup:.15,duration:1.4,recover:.16,range:106,tick:.2,damage:8,stun:.32,move:.62,knockback:0,pullRange:210,pullSpeed:300,pullAhead:54,gatherStun:.8},
+  leap:{name:'跃击',role:'落点',key:'4',cd:7,windup:.18,flight:.48,recover:.2,distance:260,minDistance:40,range:108,damage:46,stun:.5,knockback:200,launch:1,speed:560,aimBias:0}
 };
 const cloneSkills=()=>JSON.parse(JSON.stringify(SKILLS));
 let SK=cloneSkills();
-const baseStats=()=>({dmg:1,skill:1,crit:.1,critMul:1.6,maxHp:100,heal:2,speed:1,dodgeCd:.8,third:0,guard:0,thorn:0,leech:0,reset:false,
+const baseStats=()=>({dmg:1,skill:1,crit:.1,critMul:1.6,maxHp:500,heal:2,speed:1,dodgeCd:.8,third:0,guard:0,thorn:0,leech:0,reset:false,
   impact:1,launchMul:1,finMed:false,pierce:0,trail:0,transfer:0,pin:0,pinDmg:0,shard:0,echo:0,echoAt:5,ramHeal:0,
-  has:{shock:true,cleave:true,whirl:false,leap:false}});
+  has:{shock:true,cleave:true,whirl:true,leap:false}});
 /* 符文：stage 0–3 = 机制符文，只改写撞击管线的一格；无 stage 且无 unlock = 淬炼（纯数值） */
 const STAGES=['出手','飞行','撞击','余波'];
 const RUNES=[
@@ -254,20 +270,20 @@ const RUNES=[
   {id:'anvil',glyph:'砧',name:'淬炼 · 重砧',max:3,desc:'所有撞击伤害 +25%。',fn:S=>{S.impact+=.25;}},
   {id:'edge',glyph:'刃',name:'淬炼 · 锻刃',max:3,desc:'普攻伤害 +20%。',fn:S=>{S.dmg+=.2;}},
   {id:'haste',glyph:'息',name:'淬炼 · 炉息',max:2,desc:'所有战技冷却 −15%。',fn:()=>{for(const id of ORDER)SK[id].cd*=.85;}},
-  {id:'vit',glyph:'躯',name:'淬炼 · 铁躯',max:3,desc:'生命上限 +25，并立即回复 25。',fn:(S,h)=>{S.maxHp+=25;h.hp+=25;}},
+  {id:'vit',glyph:'躯',name:'淬炼 · 铁躯',max:3,desc:'生命上限 +125，并立即回复 125。',fn:(S,h)=>{S.maxHp+=125;h.hp+=125;}},
   {id:'swift',glyph:'疾',name:'淬炼 · 疾行',max:2,desc:'移动速度 +10%，闪避冷却 −25%。',fn:S=>{S.speed+=.1;S.dodgeCd*=.75;}}
 ];
-const MEND={id:'mend',glyph:'愈',name:'疗伤',once:true,desc:'立即回复 '+CFG.forge.mend+' 点生命。不占符文。',fn:(S,h)=>{h.hp=Math.min(S.maxHp,h.hp+CFG.forge.mend);}};
+const MEND={id:'mend',glyph:'愈',name:'疗伤',once:true,desc:'立即回复 '+Math.round(CFG.forge.mend*100)+'% 最大生命。不占符文。',fn:(S,h)=>{h.hp=Math.min(S.maxHp,h.hp+Math.round(S.maxHp*CFG.forge.mend));}};
 /* 波次：m 骸卒 / a 弓手 / b 重甲 / x 爆尸 / e 精英 */
 const WAVES=[
-  {name:'灰土初醒',tip:'连斩第三击是「终结击」——把骸卒打向墙、石柱、尖刺或别的骸卒',m:8,cap:6},
-  {name:'骨矢',tip:'弓手躲在后排——最好的箭，是你打过去的骸卒',m:9,a:3,cap:8},
-  {name:'重甲列阵',tip:'重甲只有破甲重斩打得飞；它也是砧板——把骸卒砸在它身上可破甲',m:10,b:2,cap:9},
-  {name:'铁誓破坏者',tip:'破坏者打不飞：用骸卒砸它累积「破势」，破势后眩晕、护甲失效、受伤 +40%',m:10,a:2,e:1,cap:9},
-  {name:'绿焰',tip:'爆尸：打飞它，撞到什么就在哪里炸；让它贴身，炸的是你',m:12,x:4,a:2,b:1,cap:12},
-  {name:'骸潮',tip:'数量压境——怪越多，弹药越多',m:20,a:3,b:3,x:3,cap:16},
-  {name:'双誓',tip:'两名破坏者——把一个当砧板，砸另一个的援军',m:12,a:3,b:2,x:3,e:2,cap:13},
-  {name:'炉心骸王',tip:'骸王护甲厚重：把亡骨砸在它身上，破势后处刑',boss:1,cap:10}
+  {name:'灰土初醒',tip:'连斩第三击是「终结击」——把骸卒打向墙、石柱、尖刺或别的骸卒',m:40,cap:30},
+  {name:'骨矢',tip:'弓手躲在后排——最好的箭，是你打过去的骸卒',m:45,a:15,cap:40},
+  {name:'重甲列阵',tip:'重甲只有破甲重斩打得飞；它也是砧板——把骸卒砸在它身上可破甲',m:50,b:10,cap:45},
+  {name:'铁誓破坏者',tip:'破坏者打不飞：用骸卒砸它累积「破势」，破势后眩晕、护甲失效、受伤 +40%',m:54,a:10,e:1,cap:45},
+  {name:'绿焰',tip:'爆尸：打飞它，撞到什么就在哪里炸；让它贴身，炸的是你',m:60,x:20,a:10,b:5,cap:60},
+  {name:'骸潮',tip:'数量压境——怪越多，弹药越多',m:100,a:15,b:15,x:15,cap:80},
+  {name:'双誓',tip:'两名破坏者——把一个当砧板，砸另一个的援军',m:68,a:15,b:10,x:15,e:2,cap:65},
+  {name:'炉心骸王',tip:'骸王护甲厚重：把亡骨砸在它身上，破势后处刑',boss:1,cap:50}
 ];
 
 /* ================= 2. 工具 ================= */
@@ -501,6 +517,7 @@ const World=(()=>{
     const put=(type,x,y,rad,ex)=>props.push(Object.assign({type,x,y,r:rad,seed:props.length*17.3+3},ex||{}));
     for(const p of CFG.arena.pillars)put('pillar',p[0],p[1],22,{h:p[2]||52,broken:!!p[3]});
     for(const b of CFG.arena.braziers)put('brazier',b[0],b[1],11);
+    for(const r of CFG.arena.rubble)put('rubble',r[0],r[1],r[2]);
     for(const t of CFG.arena.torches)torches.push({x:t[0],y:t[1],seed:t[0]*.37+t[1]*.11});
     for(const s of spikes)for(let v=s.a+50;v<s.b;v+=120)spikePts.push(s.side==='e'?[W-WALL,v]:s.side==='w'?[WALL,v]:s.side==='n'?[v,WALL]:[v,H-WALL]);
   })();
@@ -514,7 +531,7 @@ const World=(()=>{
   function walkable(x,y,r){return x>=r+WALL&&y>=r+WALL&&x<=W-r-WALL&&y<=H-r-WALL&&!blocked(x,y,r);}
   function clearSegment(ax,ay,bx,by,r=0){for(const p of props)if(segDist(p.x,p.y,ax,ay,bx,by).d<p.r+r)return false;return true;}
   function drawShadow(g,p){g.fillStyle='rgba(0,0,0,.42)';g.beginPath();
-    if(p.type==='pillar')g.ellipse(p.x+12,p.y+8,32,14,.25,0,TAU);else g.ellipse(p.x+4,p.y+4,15,6,0,0,TAU);g.fill();}
+    if(p.type==='pillar')g.ellipse(p.x+12,p.y+8,32,14,.25,0,TAU);else if(p.type==='rubble')g.ellipse(p.x+4,p.y+5,p.r+3,p.r*.8,.12,0,TAU);else g.ellipse(p.x+4,p.y+4,15,6,0,0,TAU);g.fill();}
   function drawProp(g,p){
     const x=p.x,y=p.y;g.lineJoin='round';g.lineCap='round';
     if(p.type==='pillar'){
@@ -534,7 +551,19 @@ const World=(()=>{
       if(p.broken){g.fillStyle='#1a1a1c';g.beginPath();g.moveTo(x+3,y-6-hh-5);g.lineTo(x+14,y-6-hh);g.lineTo(x+8,y-6-hh+9);g.lineTo(x+1,y-6-hh+3);g.closePath();g.fill();
         g.strokeStyle='rgba(5,5,6,.85)';g.lineWidth=1.1;g.beginPath();g.moveTo(x+6,y-4-hh+6);g.lineTo(x+3,y-hh+14);g.lineTo(x+7,y-hh+24);g.stroke();}
       g.fillStyle='rgba(58,78,44,.4)';g.beginPath();g.ellipse(x-8,y-3,8,5,0,0,TAU);g.fill();
-    }else{
+    }else if(p.type==='rubble'){
+      // The round ground plinth is the entire collision footprint: no invisible long wall.
+      g.fillStyle='#292a2b';g.strokeStyle=INK;g.lineWidth=1.6;
+      g.beginPath();g.arc(x,y,p.r,0,TAU);g.fill();g.stroke();
+      // Three squat masonry fragments, all resting inside that clear ground outline.
+      for(const [ox,oy,w,hh]of[[-13,3,15,16],[5,7,18,12],[1,-9,17,14]]){
+        const a=x+ox,b=y+oy;
+        g.fillStyle='#37393b';g.beginPath();g.moveTo(a-w/2,b-hh);g.lineTo(a+w/2,b-hh-2);g.lineTo(a+w/2,b+3);g.lineTo(a-w/2,b+5);g.closePath();g.fill();g.stroke();
+        g.fillStyle='#626460';g.beginPath();g.moveTo(a-w/2,b-hh);g.lineTo(a-w/2+4,b-hh-5);g.lineTo(a+w/2,b-hh-2);g.lineTo(a+w/2-3,b-hh+3);g.closePath();g.fill();g.stroke();
+        g.strokeStyle='#171819';g.beginPath();g.moveTo(a+2,b-hh+3);g.lineTo(a-1,b-hh/2);g.lineTo(a+3,b+2);g.stroke();g.strokeStyle=INK;
+      }
+      g.fillStyle='rgba(78,91,52,.4)';g.beginPath();g.ellipse(x-5,y+13,9,4,.2,0,TAU);g.fill();
+    }else if(p.type==='brazier'){
       for(const lx of[-10,0,10]){g.beginPath();g.moveTo(x+lx,y+(lx?2:5));g.lineTo(x+lx*.4,y-20);g.strokeStyle=INK;g.lineWidth=4.2;g.stroke();g.strokeStyle='#3d3c40';g.lineWidth=2;g.stroke();}
       g.fillStyle='#242327';g.strokeStyle=INK;g.lineWidth=1.6;g.beginPath();g.ellipse(x,y-22,14,9,0,0,Math.PI);g.closePath();g.fill();g.stroke();
       g.fillStyle='#131214';g.beginPath();g.ellipse(x,y-22,14,4.6,0,0,TAU);g.fill();g.strokeStyle='#5d5a52';g.lineWidth=1.2;g.stroke();
@@ -549,6 +578,7 @@ const newStat=()=>({ramKills:0,ramDmg:0,bestChain:0,impacts:0});
 const G={
   state:'title',paused:false,lab:false,t:0,rt:0,time:0,kills:0,hitStop:0,timeScale:1,spawnT:2,clearT:0,deadClock:0,endClock:0,nextId:1,hurtFx:0,hintT:0,supplyT:0,fireT:0,
   wave:0,queue:[],hpMul:1,dmMul:1,oath:0,S:baseStats(),runes:{},choices:[],forgeAt:0,
+  potion:{charges:CFG.potion.max,recharge:0},
   labOptions:{normalCap:50,eliteCap:10,cd:0},stat:newStat(),chain:null,pending:[],fires:[],
   hero:null,enemies:[],particles:[],debris:[],numbers:[],flashes:[],trail:[],projectiles:[],skillFx:[],
   cam:{x:World.W/2,y:World.H/2,dz:0,trauma:0,kx:0,ky:0,sx:0,sy:0},
@@ -561,6 +591,26 @@ const enemyReach=e=>e.r+CFG.hero.r+(e.brute?CFG.enemy.bruteReach:CFG.enemy.reach
 function notice(text,life=1.6){G.notice={text,life};}
 function banner(a,b,life=2.6){G.banner={a,b:b||'',life};}
 function heal(n){const h=G.hero;if(!h.dead)h.hp=Math.min(G.S.maxHp,h.hp+n);}
+// Blood flask is immediate and independent of melee / skill / dodge action state.
+function usePotion(){
+  const h=G.hero,p=G.potion,C=CFG.potion;
+  if(G.state!=='play'||G.paused||!h||h.dead||h.hp<=0||h.hp>=G.S.maxHp||p.charges<=0)return false;
+  const before=h.hp;heal(Math.round(G.S.maxHp*C.heal));p.charges--;
+  if(p.recharge<=0)p.recharge=C.recharge;
+  const gained=Math.round(h.hp-before);
+  addNumber(h.x,h.y-65,'+'+gained,'heal');
+  addSkillFx({type:'ring',x:h.x,y:h.y,range:68,color:'#74dc9b',life:.6});
+  notice('血瓶回复 '+gained+' 生命',1.2);Sfx.rune();syncUI(true);return true;
+}
+function rechargePotion(seconds){
+  const h=G.hero,p=G.potion,C=CFG.potion;
+  if(G.state!=='play'||G.paused||!h||h.dead||h.hp<=0||!Number.isFinite(seconds)||seconds<=0)return;
+  if(p.charges>=C.max){p.recharge=0;return;}
+  p.recharge-=seconds;
+  while(p.recharge<=1e-9&&p.charges<C.max){p.charges++;p.recharge+=C.recharge;}
+  if(p.charges>=C.max)p.recharge=0;
+}
+
 
 const POSE={idle:{tw:.28,hip:.10,sa:.52,hr:13.5,ha:.72,ld:0,cr:0},wind:{tw:1.05,hip:.42,sa:2.5,hr:12.5,ha:1.55,ld:-3.5,cr:.08},end:{tw:-.9,hip:-.5,sa:-2.05,hr:14,ha:-1.0,ld:5,cr:.05}};
 const PK=['tw','hip','sa','hr','ha','ld','cr'];
@@ -580,7 +630,7 @@ function bladeSeg(h,p){
   return{hx,hy,bx:hx+c*8,by:hy+s*8,tx:hx+c*L,ty:hy+s*L,c,s};
 }
 function newHero(){
-  return{x:World.W/2,y:World.H/2,vx:0,vy:0,r:CFG.hero.r,hp:100,hpLag:100,bodyAng:-1.2,aim:-1.2,headAng:-1.2,walk:0,moveAmt:0,stepIdx:0,
+  return{x:World.W/2,y:World.H/2,vx:0,vy:0,r:CFG.hero.r,hp:500,hpLag:500,bodyAng:-1.2,aim:-1.2,headAng:-1.2,walk:0,moveAmt:0,stepIdx:0,
     phase:'idle',pt:0,pdur:0,side:1,from:null,pose:poseOf('idle',1),hits:new Set(),buffer:0,lunge:0,swingId:0,swingStop:0,chainAt:CFG.atk.chainAt,autoAim:null,
     dodgeT:0,dodgeCd:0,dodgeInv:0,ddx:0,ddy:0,inv:0,hurtT:0,dead:false,deadT:0,fallAng:0,sword:null,cloakAng:-1.2+Math.PI,cloakVel:0,
     cast:null,sq:null,cooldowns:{shock:0,cleave:0,whirl:0,leap:0},jumpZ:0,swingBonus:1,heavy:false,combo:0,comboT:0,vol:null,cause:''};
@@ -636,7 +686,7 @@ function finishKill(e,pow){
   if(e.dead||e.dying)return;
   if(e.bomb&&!e.exploded){explode(e);return;}
   e.jz=0;e.fvx=e.fvy=0;killEnemy(e,pow||1);
-  G.kills++;if(e.killSrc==='ram')G.stat.ramKills++;
+  G.kills++;rechargePotion(CFG.potion.killCredit);if(e.killSrc==='ram')G.stat.ramKills++;
   heal(G.S.heal*(e.elite?5:1)+(e.killSrc==='ram'?G.S.ramHeal:0));
   if(e.boss)win();
 }
@@ -1069,9 +1119,20 @@ function updateHero(dt,c){
 /* —— 敌人 —— */
 function viewportBounds(){const a=s2w(0,0),b=s2w(View.cw,View.ch);return{x0:Math.min(a[0],b[0]),y0:Math.min(a[1],b[1]),x1:Math.max(a[0],b[0]),y1:Math.max(a[1],b[1])};}
 function visibleForAttack(e,margin=32){const p=w2s(e.x,e.y);return p[0]>=margin&&p[0]<=View.cw-margin&&p[1]>=margin+40&&p[1]<=View.ch-margin;}
-function findSpawnPoint(radius,minD){
+function findSpawnPoint(radius,minD,near=false){
   const b=viewportBounds(),h=G.hero,start=Math.random()*64|0;
   const free=(x,y)=>World.walkable(x,y,radius+3)&&Math.hypot(x-h.x,y-h.y)>=minD&&!G.enemies.some(e=>!e.dead&&Math.hypot(e.x-x,e.y-y)<e.r+radius+12);
+  // Expedition crowds may emerge visibly, with the existing .6s spawn tell.
+  // Keep distance, collision and a clear route; fall back to the proven outer search.
+  if(near){
+    const pad=World.WALL+radius+6,x0=Math.max(pad,b.x0+32),x1=Math.min(World.W-pad,b.x1-32);
+    const y0=Math.max(pad,b.y0+72),y1=Math.min(World.H-pad,b.y1-32);
+    if(x1>x0&&y1>y0)for(let i=0;i<96;i++){
+      const x=rand(x0,x1),y=rand(y0,y1);
+      if(free(x,y)&&World.clearSegment(x,y,h.x,h.y,radius+2))return{x,y};
+    }
+  }
+
   for(let i=0;i<384;i++){
     const ring=Math.floor(i/64),k=(i+start)%64,pad=95+ring*72,side=k%4,u=((k>>2)+.5)/16;let x,y;
     if(side===0){x=b.x0-pad;y=lerp(b.y0,b.y1,u);}else if(side===1){x=b.x1+pad;y=lerp(b.y0,b.y1,u);}
@@ -1095,7 +1156,7 @@ function makeEnemy(type,x,y){
     fvx:0,fvy:0,vol:null,flyHit:null,pierce:0,spin:0,fireD:0,pinned:0,broken:0,poise:0,poiseMax:boss?125:75,doomed:false,exploded:false,killSrc:'hit'};
 }
 function spawnEnemy(type){
-  const big=type==='boss'||type==='elite',p=findSpawnPoint(big?28:18,big?340:300);if(!p)return false;
+  const big=type==='boss'||type==='elite',p=findSpawnPoint(big?28:18,big?340:G.lab?300:210,!G.lab&&!big);if(!p)return false;
   const e=makeEnemy(type,p.x,p.y);
   if(big){e.state='chase';e.atkCd=.6;Sfx.warn();
     if(type==='boss')banner('炉心骸王降临','护甲厚重——把亡骨砸在它身上，破势后处刑；拉远会被跃击追上',3.6);
@@ -1734,7 +1795,7 @@ const Render=(()=>{
       const base=n.kind==='c'?28:18;
       g.globalAlpha=clamp(al,0,1);g.font='700 '+(base*pop*fsc).toFixed(1)+'px Georgia,"Times New Roman",serif';
       g.lineWidth=n.kind==='c'?5:4;g.strokeStyle=n.kind==='c'?'#2a0d04':'#120d0a';g.strokeText(n.val,s[0],s[1]);
-      g.fillStyle=n.kind==='c'?'#f2a03a':n.kind==='h'?'#e04a36':'#eadfc6';g.fillText(n.val,s[0],s[1]);
+      g.fillStyle=n.kind==='c'?'#f2a03a':n.kind==='h'?'#e04a36':n.kind==='heal'?'#74dc9b':'#eadfc6';g.fillText(n.val,s[0],s[1]);
     }
     g.globalAlpha=1;
     const R=Math.hypot(View.cw,View.ch)/2;
@@ -1766,6 +1827,9 @@ function syncUI(force){
   uiText('waveTxt',G.wave?'第 '+G.wave+' / '+WAVES.length+' 波'+(G.oath?' · 誓'+G.oath:''):'—');
   let n=G.queue.length;for(const e of G.enemies)if(!e.dying&&!e.dead)n++;
   uiText('foes',n);uiText('kills',G.kills);uiText('bestChain',G.stat.bestChain);uiText('chainTxt',G.chain?'连锁 ×'+G.chain.n:'');
+  const p=G.potion,usable=G.state==='play'&&!G.paused&&!h.dead&&h.hp>0&&h.hp<S.maxHp&&p.charges>0;
+  $('btnPotion').disabled=!usable;show('btnPotion',G.state!=='title');
+  uiText('potionCount',p.charges+' / '+CFG.potion.max);uiText('potionCd',p.charges<CFG.potion.max?Math.ceil(p.recharge)+'s 回充':'满瓶');
   const ready=h.dodgeCd<=0;$('dgFill').style.width=(h.dead?0:clamp(1-h.dodgeCd/S.dodgeCd,0,1)*100)+'%';$('dgBar').classList.toggle('cd',!ready);$('btnDodge').classList.toggle('cd',!ready);
   for(const id of ORDER){
     const b=$('sk-'+id),K=SK[id],cd=h.cooldowns[id],has=S.has[id],active=!!h.cast&&h.cast.id===id;
@@ -1787,7 +1851,7 @@ function syncUI(force){
 function setMode(m){
   Input.st.mode=m;Input.reset();document.body.classList.toggle('touch',m==='touch');
   uiText('btnMode','操作：'+(m==='touch'?'触屏':'键鼠'));
-  $('hint').textContent=m==='touch'?'':'WASD 移动 · 鼠标瞄准 · 左键挥斩（可按住）· 空格闪避 · 1–4 战技 · P 暂停';
+  $('hint').textContent=m==='touch'?'':'WASD 移动 · 鼠标瞄准 · 左键挥斩（可按住）· 空格闪避 · 1–4 战技 · Q 血瓶 · P 暂停';
   G.hintT=10;$('hint').classList.remove('fade');
   document.querySelectorAll('.modeBtn').forEach(b=>b.classList.toggle('sel',b.dataset.mode===m));
 }
@@ -1808,9 +1872,9 @@ function requestSkill(id){
 }
 /* —— 波次与符炉 —— */
 function startWave(n){
-  G.wave=n;const W=WAVES[n-1];G.queue.length=0;G.clearT=0;G.spawnT=W.boss?2.6:1.8;
+  G.wave=n;const W=WAVES[n-1];G.queue.length=0;G.clearT=0;G.spawnT=CFG.horde.first;G.supplyT=CFG.launch.bossSupply;
   G.hpMul=(1+.07*(n-1))*(1+.3*G.oath);G.dmMul=(1+.04*(n-1))*(1+.25*G.oath);
-  if(W.boss)G.queue.push('boss');
+  if(W.boss){G.queue.push('boss');for(let i=0;i<24;i++)G.queue.push(i%8===0?'bomber':'melee');}
   else{
     const q=[];for(const[k,t]of[['m','melee'],['a','archer'],['b','brute'],['x','bomber']])for(let i=0;i<(W[k]||0);i++)q.push(t);
     for(let i=q.length-1;i>0;i--){const j=Math.random()*(i+1)|0;const tmp=q[i];q[i]=q[j];q[j]=tmp;}
@@ -1821,12 +1885,15 @@ function startWave(n){
 }
 function updateSpawner(dt){
   if(G.lab)return;
-  if(WAVES[G.wave-1]?.boss){G.supplyT-=dt;if(G.supplyT<=0){G.supplyT=CFG.launch.bossSupply;let n=G.enemies.filter(e=>!e.dead&&!e.dying).length+G.queue.length;for(let i=0;i<CFG.launch.bossAmmo&&n+i<WAVES[G.wave-1].cap;i++)G.queue.push(i===0?'bomber':'melee');}}
+  if(WAVES[G.wave-1]?.boss){G.supplyT-=dt;if(G.supplyT<=0){G.supplyT=CFG.launch.bossSupply;if(!G.queue.length)G.spawnT=0;let n=G.enemies.filter(e=>!e.dead&&!e.dying).length+G.queue.length;for(let i=0;i<CFG.launch.bossAmmo&&n+i<WAVES[G.wave-1].cap;i++)G.queue.push(i===0?'bomber':'melee');}}
   let alive=0;for(const e of G.enemies)if(!e.dying&&!e.dead)alive++;
   const W=WAVES[G.wave-1];
   if(G.queue.length){
     G.spawnT-=dt;
-    if(G.spawnT<=0&&alive<W.cap){if(spawnEnemy(G.queue[0]))G.queue.shift();G.spawnT=Math.max(.55,1.2-.08*G.wave);}
+    if(G.spawnT<=0&&alive<W.cap){for(let i=0;i<CFG.horde.batch&&G.queue.length&&alive<W.cap;i++){
+      if(!spawnEnemy(G.queue[0]))break; // Keep the failed queue head for the next bounded retry.
+      G.queue.shift();alive++;
+    }G.spawnT=CFG.horde.interval;}
   }else if(alive===0&&!W.boss){
     if(G.clearT===0)banner('波次肃清','符炉开启…',1.2);
     G.clearT+=dt;if(G.clearT>=1.3)openForge();
@@ -1841,8 +1908,13 @@ function rollRunes(){
   return pick;
 }
 function openForge(){
-  heal(CFG.forge.heal);G.state='forge';Input.reset();G.choices=rollRunes();if(!G.choices.length)G.choices=[MEND];if(G.hero.hp/G.S.maxHp<CFG.forge.mendBelow)G.choices[G.choices.length-1]=MEND;G.forgeAt=performance.now();G.projectiles.length=0;
-  uiText('forgeSub',G.lab?'试验场 · 选择一个符文':('第 '+G.wave+' 波已破 · 回复 '+CFG.forge.heal+' 生命 · 下一波：'+WAVES[G.wave].name));
+  if(G.state!=='play'||G.paused||G.hero.dead)return;
+  const h=G.hero,before=h.hp,p=G.potion,charges=p.charges;
+  heal(Math.max(Math.round(G.S.maxHp*CFG.forge.heal),Math.ceil(G.S.maxHp*CFG.forge.floor)-h.hp));
+  const recovered=Math.round(h.hp-before);
+  p.charges=Math.min(CFG.potion.max,p.charges+1);if(p.charges===CFG.potion.max)p.recharge=0;
+  G.state='forge';Input.reset();G.choices=rollRunes();if(!G.choices.length)G.choices=[MEND];G.forgeAt=performance.now();G.projectiles.length=0;
+  uiText('forgeSub',(G.lab?'试验场':('第 '+G.wave+' 波已破'))+' · 回复 '+recovered+' 生命 · '+(p.charges>charges?'血瓶 +1':'血瓶已满')+(G.lab?' · 选择一个符文':(' · 下一波：'+WAVES[G.wave].name)));
   $('forgeCards').innerHTML=G.choices.map((r,i)=>{const n=G.runes[r.id]||0;
     return '<button class="rune" data-i="'+i+'"><span class="keycap">'+(i+1)+'</span><span class="glyph"><i>'+r.glyph+'</i></span><strong>'+r.name+'</strong><em>'+(r.once?'即时回复':r.unlock?'新战技':n?'强化 '+ROMAN[n]+' → '+ROMAN[n+1]:'新符文 · 最多 '+r.max+' 层')+'</em><span class="rd">'+r.desc+'</span></button>';}).join('');
   show('ovForge',true);Sfx.rune();syncUI(true);
@@ -1872,7 +1944,7 @@ function showEnd(won){
 function reset(){
   for(const k of['enemies','particles','debris','numbers','flashes','trail','projectiles','skillFx','queue','pending','fires'])G[k].length=0;
   G.notice=G.banner=null;G.kills=0;G.time=0;G.t=0;G.hitStop=0;G.timeScale=1;G.spawnT=2;G.clearT=0;G.deadClock=0;G.endClock=0;G.hurtFx=0;G.nextId=1;G.paused=false;G.wave=0;G.choices=[];
-  G.S=baseStats();SK=cloneSkills();G.runes={};G.hero=newHero();G.stat=newStat();G.chain=null;G.supplyT=CFG.launch.bossSupply;G.fireT=0;
+  G.S=baseStats();SK=cloneSkills();G.runes={};G.hero=newHero();G.potion={charges:CFG.potion.max,recharge:0};G.stat=newStat();G.chain=null;G.supplyT=CFG.launch.bossSupply;G.fireT=0;
   const c=G.cam;c.x=G.hero.x;c.y=G.hero.y;c.trauma=0;c.kx=c.ky=c.sx=c.sy=0;c.dz=0;
   Input.reset();Sfx.stopAll();renderRunes();
 }
@@ -1930,7 +2002,7 @@ function updateCamera(rdt){
 }
 function update(rdt){
   if(G.paused||G.state==='forge'){updateCamera(rdt);return;}
-  G.rt+=rdt;let dt=rdt*G.timeScale;
+  rechargePotion(rdt);G.rt+=rdt;let dt=rdt*G.timeScale;
   if(G.hitStop>0){G.hitStop-=rdt;dt*=.03;}
   G.t+=dt;
   const c=sampleControls();updateHero(dt,c);
@@ -1970,6 +2042,7 @@ function labAction(v){
     onAction:()=>Sfx.unlock(),
     onKey:c=>{
       if(G.state==='forge'){if(/^Digit[1-3]$/.test(c))takeRune(Number(c.slice(-1))-1);return;}
+      if(c==='KeyQ'){usePotion();return;}
       if(/^Digit[1-4]$/.test(c)){requestSkill(ORDER[Number(c.slice(-1))-1]);return;}
       if(c==='KeyP'||c==='Escape'){if(G.paused)setPause(false);else setPause(true,false);}
       else if(c==='KeyM')toggleMute();
@@ -1978,6 +2051,7 @@ function labAction(v){
     },
     onBlur:loseFocus,onFocus:gainFocus});
   const click=(id,fn)=>$(id).addEventListener('click',e=>{Sfx.unlock();Sfx.ui();fn(e);e.currentTarget.blur();});
+  click('btnPotion',usePotion);
   click('btnStart',()=>start(0));
   click('btnLab',()=>start(0,true));
   click('btnTitle',()=>{reset();G.lab=false;G.state='title';for(const id of ['ovPause','ovEnd','ovForge','labBar'])show(id,false);show('ovTitle',true);});
