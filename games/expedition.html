@@ -148,6 +148,22 @@ body.touch #btnPotion .keycap{display:none}
 .audioSettings input{width:min(140px,35vw);min-height:44px;accent-color:#bfa66a;touch-action:pan-x}
 .audioSettings output{width:34px;text-align:right}
 .audioSettings button{min-height:44px}
+#labBar #trialPreset{width:100%;min-width:0;min-height:44px;background:#211e1b;color:#e7d8bf;border:1px solid #665748;font:inherit}
+#labBar #trialReset,#labBar #trialMotion{min-height:44px;white-space:normal}
+#trialStatus,#trialGuide{font-size:11px;line-height:1.45;overflow-wrap:anywhere}
+#trialStats{white-space:pre-wrap;overflow-wrap:anywhere;font:11px/1.5 sans-serif;margin:5px 0}
+#labBar summary{min-height:32px;display:flex;align-items:center}
+/* Lab drawer: a persistent independent target leaves the combat view clear when collapsed. */
+#trialPanelToggle{position:fixed;right:calc(10px + var(--sr));top:calc(62px + var(--st));z-index:17;min-width:44px;min-height:44px;width:64px;padding:6px;font-size:12px}
+#labBar{top:calc(112px + var(--st))}
+@media (max-width:700px){
+ #trialPanelToggle{top:calc(72px + var(--st))}
+ #labBar{top:calc(124px + var(--st))}
+}
+@media (max-height:480px) and (orientation:landscape){
+ #trialPanelToggle{right:calc(156px + var(--sr));top:calc(76px + var(--st));width:52px}
+ #labBar{top:calc(112px + var(--st))}
+}
 </style>
 </head>
 <body>
@@ -158,10 +174,20 @@ body.touch #btnPotion .keycap{display:none}
   <div class="row"><span class="lbl">闪避</span><div id="dgBar"><div id="dgFill"></div></div><span id="runeLine"></span></div>
 </div>
 <div id="hudR" class="panel"><button id="btnPause">暂停</button><button id="btnSnd">声音：开</button></div>
+<button id="trialPanelToggle" class="hidden" type="button" aria-controls="labBar" aria-expanded="false" aria-label="展开固定对照面板">对照</button>
 <div id="labBar" class="panel hidden">
-  <span class="lbl">试验场</span>
+  <span class="lbl">固定对照 · 试验场</span>
+  <label for="trialPreset">场景</label><select id="trialPreset" aria-label="固定对照场景">
+    <option value="wall-near">A · 近墙骸卒</option><option value="wall-far">A · 远墙骸卒</option>
+    <option value="body-indirect">B · 借前排撞击</option><option value="body-direct">B · 直接攻击后排</option>
+    <option value="shard-off">C · 无碎骨雨符</option><option value="shard-on">C · 一层碎骨雨符</option>
+  </select>
+  <button id="trialReset">重置此对照</button><button id="trialMotion" aria-pressed="false">静态靶 · 切换移动</button>
+  <span id="trialStatus"></span><span id="trialGuide"></span>
+  <details id="trialResults"><summary>本轮记录 / 口径</summary><pre id="trialStats"></pre></details>
+  <details><summary>自由召唤 / 调试</summary>
   <button data-lab="m">骸卒 ×6</button><button data-lab="a">弓手 ×2</button><button data-lab="b">重甲 ×1</button><button data-lab="x">爆尸 ×3</button><button data-lab="e">破坏者 ×1</button>
-  <details><summary>调试设置</summary><label>普通上限 <input id="labNormal" type="number" min="1" max="200" value="50" style="width:52px"></label><br><label>精英上限 <input id="labElite" type="number" min="1" max="30" value="10" style="width:52px"></label><br><label>技能CD秒 <input id="labCD" type="number" min="0" max="60" step="0.5" value="0" style="width:52px"></label></details><button data-lab="boss">Boss ×1</button><button data-lab="fill">普通补满</button><button data-lab="rune">抽符文</button><button data-lab="cd">冷却清零</button><button data-lab="clear">清场</button>
+  <details><summary>调试设置</summary><label>普通上限 <input id="labNormal" type="number" min="1" max="200" value="50" style="width:52px"></label><br><label>精英上限 <input id="labElite" type="number" min="1" max="30" value="10" style="width:52px"></label><br><label>技能CD秒 <input id="labCD" type="number" min="0" max="60" step="0.5" value="0" style="width:52px"></label></details><button data-lab="boss">Boss ×1</button><button data-lab="fill">普通补满</button><button data-lab="rune">抽符文</button><button data-lab="cd">冷却清零</button><button data-lab="clear">清场</button></details>
 </div>
 <div id="bossHud" class="panel hidden"><div id="bossName"></div><div id="bossTrack"><div id="bossFill"></div></div><div id="poiseTrack"><div id="poiseFill"></div></div><div id="bossState"></div></div>
 <div id="banner"><div id="b1"></div><div id="b2"></div></div>
@@ -625,7 +651,7 @@ const G={
   state:'title',paused:false,lab:false,t:0,rt:0,time:0,kills:0,hitStop:0,timeScale:1,spawnT:2,clearT:0,deadClock:0,endClock:0,nextId:1,hurtFx:0,hintT:0,supplyT:0,fireT:0,
   wave:0,queue:[],hpMul:1,dmMul:1,oath:0,S:baseStats(),runes:{},choices:[],forgeAt:0,
   potion:{charges:CFG.potion.max,recharge:0},
-  labOptions:{normalCap:50,eliteCap:10,cd:0},stat:newStat(),chain:null,pending:[],fires:[],
+  trial:null,labOptions:{normalCap:50,eliteCap:10,cd:0},stat:newStat(),chain:null,pending:[],fires:[],
   hero:null,enemies:[],particles:[],debris:[],numbers:[],flashes:[],trail:[],projectiles:[],skillFx:[],
   cam:{x:World.W/2,y:World.H/2,dz:0,trauma:0,kx:0,ky:0,sx:0,sy:0},
   opt:{shake:true,feedback:.7},notice:null,banner:null
@@ -633,6 +659,89 @@ const G={
 const View={cw:1,ch:1,dpr:1,base:1,scale:1};
 const w2s=(x,y)=>[(x-G.cam.x)*View.scale+View.cw/2+G.cam.sx,(y-G.cam.y)*View.scale+View.ch/2+G.cam.sy];
 const s2w=(x,y)=>[(x-View.cw/2-G.cam.sx)/View.scale+G.cam.x,(y-View.ch/2-G.cam.sy)/View.scale+G.cam.y];
+/* Fixed lab fixtures. Observations only: all hits still use the normal combat pipeline.
+   Combat RNG is isolated from rendering/audio; formal mode still uses Math.random. */
+const Trial=(()=>{
+  const presets={
+    'wall-near':{name:'A 近墙',hero:[520,185],enemies:[['melee',520,52]],guide:'用震荡波推向上方普通墙；与远墙组比较。'},
+    'wall-far':{name:'A 远墙',hero:[520,613],enemies:[['melee',520,480]],guide:'同距震荡波；本次上方飞行无地形阻挡。'},
+    'body-indirect':{name:'B 间接',hero:[500,480],enemies:[['melee',600,480],['archer',695,498],['archer',710,425]],guide:'向右推前排；后排有横向偏移，不保证撞中或击杀。'},
+    'body-direct':{name:'B 直接',hero:[500,480],enemies:[['melee',600,480],['archer',695,498],['archer',710,425]],guide:'同一布局：自行走位直接攻击弓手；记录准备与总耗时。'},
+    'shard-off':{name:'C 无骨片',hero:[520,185],enemies:[['melee',520,52],['archer',610,42],['archer',640,42]],guide:'震荡波推墙；重斩可观察直击已致命尸体撞墙。'},
+    'shard-on':{name:'C 一层骨片',hero:[520,185],enemies:[['melee',520,52],['archer',610,42],['archer',640,42]],shard:1,guide:'相同布局、一层碎骨雨符。骨片半径95，加目标半径判定。'}
+  };
+  const zero=()=>({direct:0,body:0,terrain:0,shard:0,other:0});
+  const active=()=>G.lab&&G.trial;
+  let panelOpen=true;
+  const compact=()=>innerWidth<=700||innerHeight<=480;
+  function panelUI(){
+    const visible=!!active()&&G.state==='play';
+    show('trialPanelToggle',visible);show('labBar',visible&&panelOpen);
+    uiText('trialPanelToggle',panelOpen?'收起':'对照');
+    $('trialPanelToggle').setAttribute('aria-expanded',String(visible&&panelOpen));
+    $('trialPanelToggle').setAttribute('aria-label',panelOpen?'收起固定对照面板':'展开固定对照面板');
+  }
+  function enter(){panelOpen=!compact();}
+  function togglePanel(){if(!active()||G.state!=='play'||G.paused)return;panelOpen=!panelOpen;if(panelOpen)$('labBar').scrollTop=0;panelUI();}
+
+  function load(id,moving=false){
+    if(!G.lab||G.state!=='play'||G.paused||!presets[id])return false;
+    if(compact())panelOpen=false;
+    const p=presets[id];reset();G.state='play';G.oath=0;G.wave=1;G.hpMul=G.dmMul=1;
+    G.rt=0;G.forgeAt=0;G.hintT=0;G.labOptions={normalCap:50,eliteCap:10,cd:0};
+    G.trial={id,moving:!!moving,seed:20261112,rng:mulberry32(20261112),custom:false,elapsed:0,firstAction:null,lastDamage:0,completed:null,
+      damage:zero(),wallKills:0,incoming:0,casts:{basic:0,shock:0,cleave:0,whirl:0,leap:0},targets:[],events:[],dropped:0};
+    G.S.has.whirl=G.S.has.leap=true;
+    if(p.shard){G.runes.shard=1;RUNES.find(r=>r.id==='shard').fn(G.S);}
+    Object.assign(G.hero,{x:p.hero[0],y:p.hero[1],aim:id.startsWith('body')?0:-Math.PI/2});
+    G.hero.bodyAng=G.hero.headAng=G.hero.aim;G.cam.x=G.hero.x;G.cam.y=G.hero.y;
+    for(const [type,x,y] of p.enemies){const e=makeEnemy(type,x,y);e.state='chase';e.walk=0;G.enemies.push(e);G.trial.targets.push({enemy:e,totals:zero()});}
+    for(const [id,key] of [['labNormal','normalCap'],['labElite','eliteCap'],['labCD','cd']])$(id).value=G.labOptions[key];
+    // Put idle keyboard aim along the fixture's launch direction. No automatic attack or correction.
+    const aim=w2s(G.hero.x+Math.cos(G.hero.aim)*133,G.hero.y+Math.sin(G.hero.aim)*133);Input.st.mx=aim[0];Input.st.my=aim[1];
+    for(const id of ['ovPause','ovEnd','ovForge'])show(id,false);
+    renderRunes();syncUI(true);return true;
+  }
+  function custom(){if(active()){G.trial.custom=true;G.trial.completed=null;}}
+  function shot(id){const t=active();if(!t)return;t.casts[id]++;if(t.firstAction===null)t.firstAction=t.elapsed;}
+  function damage(e,before,nominal,source,kind=''){
+    const t=active();if(!t)return;
+    const effective=Math.max(0,Math.min(Math.max(0,before),nominal));
+    t.damage[source]+=effective;
+    let target=t.targets.find(r=>r.enemy===e);if(!target){target={enemy:e,totals:zero()};t.targets.push(target);}
+    target.totals[source]+=effective;
+    const killed=before>0&&e.hp<=0;
+    if(kind==='wall'&&killed&&!e.doomed)t.wallKills++;
+    if(effective>0)t.lastDamage=t.elapsed;
+    if(t.events.length<160)t.events.push({at:t.elapsed,id:e.id,source,kind,before:Math.max(0,before),after:Math.max(0,e.hp),nominal,effective,doomed:!!e.doomed});else t.dropped++;
+  }
+  function tick(dt){const t=active();if(t&&G.state==='play')t.elapsed+=dt;}
+  function settle(){const t=active();if(t&&!t.custom&&t.completed===null&&t.targets.length&&t.targets.every(r=>r.enemy.hp<=0))t.completed=t.elapsed;}
+  function ui(){
+    panelUI();const t=active();if(!t)return;const p=presets[t.id],f=n=>n.toFixed(2);
+    $('trialPreset').value=t.id;uiText('trialStatus',(t.custom?'自定义 · 重置可还原':'固定预设')+' · '+(t.moving?'移动 AI':'静态靶'));
+    uiText('trialMotion',t.moving?'移动 AI · 切换静态':'静态靶 · 切换移动');$('trialMotion').setAttribute('aria-pressed',String(t.moving));uiText('trialGuide',p.guide);
+    if(!$('trialResults').open)return;
+    const lines=[p.name+' / '+t.id,(t.moving?'移动':'静态')+' · 种子 '+t.seed+' · 无轨迹提示',
+      '碎骨雨符 '+(G.runes.shard||0)+'层 / CD '+G.labOptions.cd+'秒'+(t.custom?' / 自定义':''),
+      '有效扣血：直击 '+t.damage.direct+' / 实体 '+t.damage.body+' / 地形 '+t.damage.terrain+' / 骨片 '+t.damage.shard+' / 其他 '+t.damage.other,
+      '新增墙杀 '+t.wallKills+'（仅普通墙首次归零；已致命不计）',
+      '准备 '+(t.firstAction===null?'尚未出手':f(t.firstAction)+'秒')+' / 当前 '+f(t.elapsed)+'秒',
+      '末次扣血 '+f(t.lastDamage)+'秒 / 全部致命 '+(t.custom?'自定义不计完成':t.completed===null?'未完成':f(t.completed)+'秒'),
+      '出手 '+Object.entries(t.casts).map(([k,v])=>(k==='basic'?'普攻':SK[k].name)+':'+v).join(' '),
+      '玩家实受伤 '+t.incoming+'（保留受伤累计，回血不抵扣）',
+      '准备从重置到首个有效出手开始；当前/末次扣血从重置起计。暂停/符炉不计时；含顿帧和走位。',
+      '静态只关自主移动/攻击，碰撞与控制仍正常。零CD结果不能直接推断正式节奏。',
+      ...t.targets.map(r=>'#'+r.enemy.id+' '+r.enemy.type+' HP '+Math.max(0,r.enemy.hp)+'/'+r.enemy.maxHp+' '+r.enemy.state+(r.enemy.doomed?' 已致命':'')+' 钉壁 '+f(r.enemy.pinned)+' 直/体/地/片/其他 '+Object.values(r.totals).join('/')),
+      '事件：秒 #目标 来源 地形 前HP→后HP 有效/名义'+(t.dropped?'（仅前160条；另有'+t.dropped+'条，汇总完整）':''),
+      ...t.events.map(e=>f(e.at)+' #'+e.id+' '+e.source+' '+e.kind+' '+e.before+'→'+e.after+' '+e.effective+'/'+e.nominal+(e.doomed?' 已致命':''))];
+    uiText('trialStats',lines.join('\n'));
+  }
+  return{presets,load,custom,shot,damage,tick,settle,ui,enter,panelUI,togglePanel};
+})();
+const combatRandom=()=>G.lab&&G.trial?G.trial.rng():Math.random();
+const combatRand=(a,b)=>a+combatRandom()*(b-a);
+
 const enemyReach=e=>e.r+CFG.hero.r+(e.brute?CFG.enemy.bruteReach:CFG.enemy.reach);
 function notice(text,life=1.6){G.notice={text,life};}
 function banner(a,b,life=2.6){G.banner={a,b:b||'',life};}
@@ -744,11 +853,11 @@ function addPoise(o,v){
   banner('破 势',(o.boss?'炉心骸王':'铁誓破坏者')+'护甲失效 · 受伤 +'+Math.round(L.breakDmg*100)+'% · 重斩处刑',1.8);
 }
 /* 撞击伤害：o 被飞行体 / 爆炸 / 骨片 / 回响命中。无视护甲。speed>0 且 o 为轻型时被带飞 */
-function ramEnemy(o,dmg,dx,dy,speed,vol,mass){
+function ramEnemy(o,dmg,dx,dy,speed,vol,mass,source='body'){
   if(o.dead||o.dying)return;
   const S=G.S,L=CFG.launch;
   const d=Math.max(1,Math.round(dmg*S.impact*(o.broken>0?1+L.breakDmg:o.exposed>0?1.2:1)*(o.pinned>0?1+S.pinDmg:1)));
-  const was=o.hp>0;o.hp-=d;if(was&&o.hp<=0)o.killSrc='ram';
+  const before=o.hp,was=o.hp>0;o.hp-=d;Trial.damage(o,before,d,source);if(was&&o.hp<=0)o.killSrc='ram';
   G.stat.ramDmg+=d;
   o.flash=.09;o.leanX=dx*10;o.leanY=dy*10;o.recoil=1;o.stunTw=rand(-.8,.8);o.kdx=dx;o.kdy=dy;
   addNumber(o.x,o.y-52*o.scale,d,'i');
@@ -759,17 +868,17 @@ function ramEnemy(o,dmg,dx,dy,speed,vol,mass){
   if(o.hp<=0){if(o.state==='fly')o.doomed=true;else finishKill(o,1.1);}
   else bossCheck(o);
 }
-function areaRam(x,y,range,dmg,speed,vol,skip){
+function areaRam(x,y,range,dmg,speed,vol,skip,source='other'){
   for(const o of G.enemies){
     if(o===skip||!ramable(o)||o.state==='fly')continue;
     const dx=o.x-x,dy=o.y-y,d=Math.hypot(dx,dy)||1;if(d>range+o.r)continue;
     chainHit(vol,o.x,o.y);
-    ramEnemy(o,dmg,dx/d,dy/d,o.wt===1?speed:0,vol,1);
+    ramEnemy(o,dmg,dx/d,dy/d,o.wt===1?speed:0,vol,1,source);
   }
 }
 function startFlight(e,dx,dy,speed,vol){
   e.state='fly';e.t=0;e.dur=1;e.fvx=dx*speed;e.fvy=dy*speed;e.kx=e.ky=0;e.kdx=dx;e.kdy=dy;
-  e.vol=vol||newVolley();e.flyHit=new Set();e.pierce=G.S.pierce;e.spin=rand(9,15)*(Math.random()<.5?-1:1);
+  e.vol=vol||newVolley();e.flyHit=new Set();e.pierce=G.S.pierce;e.spin=combatRand(9,15)*(combatRandom()<.5?-1:1);
   e.combo=0;e.struck=true;e.fireD=0;e.pinned=0;e.jz=6;
 }
 function stopFlight(e,nx,ny,stun){
@@ -785,7 +894,7 @@ function terrainImpact(e,kind,nx,ny){
   if(e.bomb){explode(e);return;}
   const base=kind==='spike'?L.spikeDmg:(kind==='wall'?L.wallDmg:L.postDmg)*k*(e.wt>1?L.heavyMul:1);
   const d=Math.max(1,Math.round(base*S.impact));
-  const was=e.hp>0;e.hp-=d;if(was&&e.hp<=0)e.killSrc='ram';
+  const before=e.hp,was=e.hp>0;e.hp-=d;Trial.damage(e,before,d,'terrain',kind);if(was&&e.hp<=0)e.killSrc='ram';
   G.stat.ramDmg+=d;addNumber(e.x,e.y-52*e.scale,d,'i');e.flash=.1;
   const dead=e.hp<=0||e.doomed,pin=L.wallStun+S.pin;
   if(!dead)e.pinned=pin;
@@ -802,7 +911,7 @@ function flyerHit(a,o,nx,ny){
   const carry=sp*Math.min(.95,L.transfer+S.transfer);
   ramEnemy(o,L.ramDmg*k*(heavy?L.heavyMul:1),dx,dy,o.wt===1&&carry>=L.minCarry?carry:0,a.vol,a.wt);
   if(a.state!=='fly')return;
-  const was=a.hp>0;a.hp-=Math.max(1,Math.round(L.selfDmg*k*S.impact));if(was&&a.hp<=0)a.killSrc='ram';
+  const before=a.hp,was=a.hp>0,selfDmg=Math.max(1,Math.round(L.selfDmg*k*S.impact));a.hp-=selfDmg;Trial.damage(a,before,selfDmg,'body');if(was&&a.hp<=0)a.killSrc='ram';
   if(a.hp<=0)a.doomed=true;
   a.flash=.05;
   if(o.wt>=2&&o.wt>=a.wt)stopFlight(a,-nx,-ny,L.anvilStun);          // 撞上砧板：停下
@@ -864,7 +973,7 @@ function explode(e){
 function shardBurst(x,y,vol){
   addSkillFx({type:'ring',x,y,range:CFG.launch.shardRange,color:'#d8ccb0',life:.32});
   for(let i=0;i<8;i++){const a=rand(0,TAU),v=rand(160,340);addP({type:'chip',x,y,z:12,vx:Math.cos(a)*v,vy:Math.sin(a)*v,vz:rand(40,130),age:0,life:rand(.4,.7),rot:rand(0,TAU),rv:rand(-20,20),size:rand(1.6,2.8)});}
-  areaRam(x,y,CFG.launch.shardRange,G.S.shard,0,vol,null);
+  areaRam(x,y,CFG.launch.shardRange,G.S.shard,0,vol,null,'shard');
 }
 function echoBurst(x,y,vol){
   const L=CFG.launch;addSkillFx({type:'ring',x,y,range:L.echoRange,color:'#e7bc72',life:.4});Sfx.boom();addShake(.3,0,2);dust(x,y,6,90);
@@ -886,7 +995,7 @@ function updateAftermath(dt,rdt){
         for(const f of F){
           const rr=L.fireR+e.r;if(Math.abs(e.x-f.x)>rr||Math.abs(e.y-f.y)>rr||Math.hypot(e.x-f.x,e.y-f.y)>rr)continue;
           const d=Math.max(1,Math.round(L.fireDmg*G.S.trail*G.S.impact*(e.broken>0?1+L.breakDmg:e.exposed>0?1.2:1)*(e.pinned>0?1+G.S.pinDmg:1))),was=e.hp>0;
-          e.hp-=d;if(was&&e.hp<=0)e.killSrc='ram';G.stat.ramDmg+=d;e.flash=.04;addNumber(e.x,e.y-52*e.scale,d,'i');
+          const before=e.hp;e.hp-=d;Trial.damage(e,before,d,'other');if(was&&e.hp<=0)e.killSrc='ram';G.stat.ramDmg+=d;e.flash=.04;addNumber(e.x,e.y-52*e.scale,d,'i');
           if(e.hp<=0)finishKill(e,1);else bossCheck(e);
           break;
         }
@@ -900,12 +1009,12 @@ function updateAftermath(dt,rdt){
 function hitEnemy(e,cx,cy,tgx,tgy,ev={}){
   if(e.dead||e.dying)return;
   const h=G.hero,S=G.S,F=CFG.fx,L=CFG.launch,basic=ev.damage===undefined;
-  const crit=basic&&Math.random()<S.crit,impact=crit||!!ev.heavy;
-  const raw=basic?rand(CFG.atk.dmgMin,CFG.atk.dmgMax)*S.dmg*h.swingBonus:ev.damage;
+  const crit=basic&&combatRandom()<S.crit,impact=crit||!!ev.heavy;
+  const raw=basic?combatRand(CFG.atk.dmgMin,CFG.atk.dmgMax)*S.dmg*h.swingBonus:ev.damage;
   const armor=ev.pierce||e.armorBreak>0||e.broken>0?0:e.armor;
   const vuln=(e.broken>0?1+L.breakDmg:e.exposed>0?1.2:1)*(e.pinned>0?1+S.pinDmg:1);
   const dmg=Math.max(1,Math.round(raw*(crit?S.critMul:1)*(1-armor)*vuln));
-  const was=e.hp>0;e.hp-=dmg;if(was&&e.hp<=0)e.killSrc='hit';
+  const before=e.hp,was=e.hp>0;e.hp-=dmg;Trial.damage(e,before,dmg,'direct');if(was&&e.hp<=0)e.killSrc='hit';
   const rx=e.x-h.x,ry=e.y-h.y,rl=Math.hypot(rx,ry)||1;
   let kx=rx/rl*.7+tgx*.3,ky=ry/rl*.7+tgy*.3;const kl=Math.hypot(kx,ky)||1;kx/=kl;ky/=kl;
   let lv=ev.launch||0,lsp=ev.speed||0,ldx=ev.dx||0,ldy=ev.dy||0;
@@ -961,6 +1070,7 @@ function sweepHit(h,sg){
 function hurtHero(dmg,fx,fy,src){
   const h=G.hero,S=G.S;if(h.dead||h.inv>0||G.paused||G.state!=='play')return false;
   dmg=Math.max(1,Math.round(dmg*(1-S.guard)));
+  if(G.lab&&G.trial)G.trial.incoming+=Math.min(Math.max(0,h.hp),dmg);
   h.hp-=dmg;h.inv=.35;h.hurtT=.22;
   let dx=h.x-fx,dy=h.y-fy;const d=Math.hypot(dx,dy)||1;dx/=d;dy/=d;
   h.vx+=dx*150;h.vy+=dy*150;
@@ -1019,6 +1129,7 @@ function castSkill(id,aim){
   if(h.dodgeT>0||h.cast||h.phase==='windup'||h.phase==='swing')return false;
   let landing=null,ang=aim.ang;
   if(id==='leap'){landing=safePath(h,aim.x,aim.y,S.distance);if(landing.distance<S.minDistance){notice('落点太近或被挡住');return true;}ang=Math.atan2(landing.y-h.y,landing.x-h.x);}
+  Trial.shot(id);
   h.cooldowns[id]=G.lab?G.labOptions.cd:S.cd;h.buffer=0;h.autoAim=null;h.lunge=0;h.swingStop=0;
   h.cast={id,t:0,ang,pull:ang,x:h.x,y:h.y,from:copyPose(h.pose),windup:S.windup,did:false,ticks:0,landing};
   h.phase='skill';h.bodyAng=h.aim=h.headAng=ang;h.vx*=.35;h.vy*=.35;if(id==='leap')h.vx=h.vy=0;
@@ -1127,7 +1238,7 @@ function updateHero(dt,c){
   const hb=h.bodyAng+h.pose.tw*.6;h.headAng=hb+clamp(angDiff(hb,h.headAng),-1,1);
   if(h.dodgeT<=0&&h.buffer>0&&(h.phase==='idle'||(h.phase==='recover'&&h.pt>=h.chainAt))){
     /* 连斩：每 finEvery 击为终结击（击飞）。停手超过 comboReset 秒则重新计数 */
-    h.combo++;h.comboT=0;h.heavy=h.combo%LN.finEvery===0;h.swingBonus=h.heavy?LN.finDmg+S.third:1;
+    Trial.shot('basic');h.combo++;h.comboT=0;h.heavy=h.combo%LN.finEvery===0;h.swingBonus=h.heavy?LN.finDmg+S.third:1;
     const chain=h.phase==='recover';
     h.phase='windup';h.pt=0;h.pdur=(chain?A.windupChain:A.windup)+(h.heavy?LN.finWindup:0);h.from=copyPose(h.pose);h.buffer=0;h.hits.clear();h.swingStop=0;h.autoAim=null;
     if(c.aim===null){let best=150,be=null;for(const e of G.enemies){if(e.dying||e.dead)continue;const d=Math.hypot(e.x-h.x,e.y-h.y);if(d<best){best=d;be=e;}}if(be)h.autoAim=Math.atan2(be.y-h.y,be.x-h.x);}
@@ -1197,7 +1308,7 @@ function makeEnemy(type,x,y){
   return{id:G.nextId++,type,x,y,r:boss?26:elite?20:brute?16:12.5,scale:boss?2:elite?1.52:brute?1.34:1,brute,elite,archer,boss,bomb,wt:elite?3:brute?2:1,
     hp,maxHp:hp,armor:boss?.4:elite?.3:brute?.3:0,kbm:boss?.1:elite?.4:brute?.6:1,dm:G.dmMul,armorBreak:0,controlGuard:0,exposed:0,seenT:0,
     face:Math.atan2(G.hero.y-y,G.hero.x-x),state:'spawn',t:0,dur:.6,walk:rand(0,TAU),kx:0,ky:0,kdx:0,kdy:0,flash:0,leanX:0,leanY:0,recoil:0,stunTw:0,
-    speed:boss?66:elite?59:brute?rand(46,54):archer?rand(54,64):bomb?rand(74,88):rand(62,82),atkCd:rand(.2,.8),struck:false,orbit:Math.random()<.5?1:-1,
+    speed:boss?66:elite?59:brute?combatRand(46,54):archer?combatRand(54,64):bomb?combatRand(74,88):combatRand(62,82),atkCd:combatRand(.2,.8),struck:false,orbit:combatRandom()<.5?1:-1,
     dead:false,dying:false,noHead:false,pow:1,combo:0,leapCd:5,sum:0,jz:0,va:0,sx:0,sy:0,tx:0,ty:0,
     fvx:0,fvy:0,vol:null,flyHit:null,pierce:0,spin:0,fireD:0,pinned:0,broken:0,poise:0,poiseMax:boss?125:75,doomed:false,exploded:false,killSrc:'hit'};
 }
@@ -1237,7 +1348,7 @@ function updateArcher(e,dt){
     e.t+=dt;if(e.t<e.dur*.6)e.face+=angDiff(e.face,toH)*Math.min(1,dt*7);
     if(e.t>=e.dur){
       if(G.projectiles.length<CFG.enemy.maxProjectiles){G.projectiles.push({x:e.x+Math.cos(e.face)*18,y:e.y+Math.sin(e.face)*18,vx:Math.cos(e.face)*245,vy:Math.sin(e.face)*245,age:0,life:2.2,damage:11*e.dm,src:'弓手的骨矢'});Sfx.enemySwing();}
-      e.state='bowRecover';e.t=0;e.dur=.55;e.atkCd=rand(2.4,3.2);
+      e.state='bowRecover';e.t=0;e.dur=.55;e.atkCd=combatRand(2.4,3.2);
     }
   }else if(e.state==='bowRecover'){e.t+=dt;if(e.t>=e.dur)e.state='chase';}
   else if(e.state==='idle')e.state='chase';
@@ -1246,7 +1357,7 @@ function eliteShape(e){const b=e.boss;return e.combo===1?{circle:true,range:b?12
 function beginEliteWind(e,combo){
   const h=G.hero;e.combo=combo;e.state='eliteWind';e.t=0;
   e.dur=(combo===0?.72:combo===1?.85:.95)*(e.boss&&e.hp<e.maxHp*.5?.88:1);
-  e.face=Math.atan2(h.y-e.y,h.x-e.x);e.va=rand(0,TAU);e.struck=false;Sfx.warn();
+  e.face=Math.atan2(h.y-e.y,h.x-e.x);e.va=combatRand(0,TAU);e.struck=false;Sfx.warn();
 }
 function updateElite(e,dt,attackers){
   const h=G.hero,dx=h.x-e.x,dy=h.y-e.y,d=Math.hypot(dx,dy)||1,toH=Math.atan2(dy,dx),p2=e.boss&&e.hp<e.maxHp*.5,speed=e.speed*(p2?1.2:1),reach=e.r+63;
@@ -1340,6 +1451,12 @@ function updateEnemies(dt){
     if(Math.abs(e.kx)+Math.abs(e.ky)>150&&Math.random()<dt*22)dust(e.x-e.kdx*8,e.y-e.kdy*8,1,16);
     if(e.dying){e.t+=dt;World.collide(e,e.r);if(e.t>=e.dur){e.dead=true;spawnBodyDebris(e);if(e.boss){spawnBodyDebris(e);spawnBodyDebris(e);}dust(e.x,e.y,3,40);}continue;}
     if(e.state==='fly'){updateFlight(e,dt);continue;}
+    if(G.lab&&G.trial&&!G.trial.moving){
+      // Preserve finite control/spawn/death-fuse timers and knockback/collision, never autonomous attacks.
+      if(e.state==='stun'||e.state==='spawn'){e.t+=dt;if(e.t>=e.dur){e.state='chase';e.atkCd=Math.max(e.atkCd,.25);}}
+      else if(e.state==='fuse'&&e.hp<=0){e.t+=dt;if(e.t>=e.dur)explode(e);}
+      World.collide(e,e.r);continue;
+    }
     const dx=h.x-e.x,dy=h.y-e.y,d=Math.hypot(dx,dy)||1,toH=Math.atan2(dy,dx);
     e.atkCd-=dt;
     if(e.archer&&e.state!=='spawn'&&e.state!=='stun'){updateArcher(e,dt);World.collide(e,e.r);continue;}
@@ -1365,10 +1482,10 @@ function updateEnemies(dt){
       case 'strike':
         e.t+=dt;e.x+=Math.cos(e.face)*55*dt;e.y+=Math.sin(e.face)*55*dt;
         if(!e.struck&&e.t>=e.dur*.45){e.struck=true;
-          if(Math.hypot(h.x-e.x,h.y-e.y)<enemyReach(e)&&Math.abs(angDiff(e.face,Math.atan2(h.y-e.y,h.x-e.x)))<CFG.enemy.arc&&World.clearSegment(e.x,e.y,h.x,h.y,1))hurtHero((e.brute?rand(16,21):rand(8,12))*e.dm,e.x,e.y,e.brute?'重甲的劈砍':'骸卒的劈砍');}
+          if(Math.hypot(h.x-e.x,h.y-e.y)<enemyReach(e)&&Math.abs(angDiff(e.face,Math.atan2(h.y-e.y,h.x-e.x)))<CFG.enemy.arc&&World.clearSegment(e.x,e.y,h.x,h.y,1))hurtHero((e.brute?combatRand(16,21):combatRand(8,12))*e.dm,e.x,e.y,e.brute?'重甲的劈砍':'骸卒的劈砍');}
         if(e.state==='strike'&&e.t>=e.dur){e.state='recover';e.t=0;e.dur=e.brute?.7:.5;}
         break;
-      case 'recover':e.t+=dt;if(e.t>=e.dur){e.state='chase';e.atkCd=rand(.3,.9);}break;
+      case 'recover':e.t+=dt;if(e.t>=e.dur){e.state='chase';e.atkCd=combatRand(.3,.9);}break;
       case 'idle':e.walk+=dt*1.6;break;
     }
     World.collide(e,e.r);
@@ -1895,7 +2012,7 @@ function syncUI(force){
     uiText('bossState',boss.state==='eliteWind'?(boss.combo===0?'横扫蓄力 · 侧闪或后撤':boss.combo===1?'踏地蓄力 · 撤出红圈':'骨矢环 · 站进箭线之间'):boss.state==='bossLeap'?'跃击 · 离开红圈':boss.state==='eliteGap'?'续招将至':boss.state==='eliteRest'?'破绽 · 受到伤害 +20%':boss.state==='stun'?'眩晕':boss.controlGuard>0?'抗控中 · 仍可造成伤害':'逼近中');
   }
   const bn=G.banner,on=!!bn&&bn.life>0;$('banner').classList.toggle('show',on);if(on){uiText('b1',bn.a);uiText('b2',bn.b);}
-  uiText('msg',G.notice&&G.notice.life>0?G.notice.text:'');
+  uiText('msg',G.notice&&G.notice.life>0?G.notice.text:'');Trial.ui();
 }
 function setMode(m){
   Input.st.mode=m;Input.reset();document.body.classList.toggle('touch',m==='touch');
@@ -1991,6 +2108,7 @@ function showEnd(won){
   show('ovEnd',true);
 }
 function reset(){
+  G.trial=null;
   for(const k of['enemies','particles','debris','numbers','flashes','trail','projectiles','skillFx','queue','pending','fires'])G[k].length=0;
   G.notice=G.banner=null;G.kills=0;G.time=0;G.t=0;G.hitStop=0;G.timeScale=1;G.spawnT=2;G.clearT=0;G.deadClock=0;G.endClock=0;G.hurtFx=0;G.nextId=1;G.paused=false;G.wave=0;G.choices=[];
   G.S=baseStats();SK=cloneSkills();G.runes={};G.hero=newHero();G.potion={charges:CFG.potion.max,recharge:0};G.stat=newStat();G.chain=null;G.supplyT=CFG.launch.bossSupply;G.fireT=0;
@@ -2001,7 +2119,7 @@ function start(oath,lab=false){
   G.lab=!!lab;
   Sfx.unlock();G.oath=Math.max(0,oath|0);reset();Sfx.suspend(false);
   for(const id of['ovTitle','ovPause','ovEnd','ovForge'])show(id,false);
-  G.hintT=10;$('hint').classList.remove('fade');startWave(1);if(G.lab){G.queue.length=0;G.S.has.whirl=G.S.has.leap=true;banner('撞击试验场','立即生成 · 技能默认无冷却 · 可调数量',3);}show('labBar',G.lab);
+  G.hintT=10;$('hint').classList.remove('fade');startWave(1);if(G.lab){G.queue.length=0;G.S.has.whirl=G.S.has.leap=true;Trial.enter();Trial.load('wall-near');}Trial.panelUI();
 }
 function setPause(p,auto){
   if(p){
@@ -2051,13 +2169,13 @@ function updateCamera(rdt){
 }
 function update(rdt){
   if(G.paused||G.state==='forge'){updateCamera(rdt);return;}
-  rechargePotion(rdt);G.rt+=rdt;let dt=rdt*G.timeScale;
+  Trial.tick(rdt);rechargePotion(rdt);G.rt+=rdt;let dt=rdt*G.timeScale;
   if(G.hitStop>0){G.hitStop-=rdt;dt*=.03;}
   G.t+=dt;
   const c=sampleControls();updateHero(dt,c);
   if(G.state==='play'){G.time+=dt;updateSpawner(dt);if(G.hintT>0){G.hintT-=rdt;if(G.hintT<=0)$('hint').classList.add('fade');}}
   if(G.state!=='forge'){updateEnemies(dt);if(G.state==='play')updateProjectiles(dt);}
-  updateAftermath(dt,rdt);updateFx(dt,rdt);updateCamera(rdt);
+  updateAftermath(dt,rdt);Trial.settle();updateFx(dt,rdt);updateCamera(rdt);
   if(G.state==='dying'){
     G.deadClock+=rdt;G.timeScale=Math.min(1,.35+G.deadClock*.5);
     if(G.deadClock>=3){G.state='dead';G.timeScale=1;Sfx.stopAll();showEnd(false);}
@@ -2077,6 +2195,7 @@ function frame(ts){
 }
 function labAction(v){
   if(!G.lab||G.state!=='play'||G.paused)return;
+  Trial.custom();
   const map={m:['melee',6],a:['archer',2],b:['brute',1],x:['bomber',3],e:['elite',1],boss:['boss',1],fill:['melee',G.labOptions.normalCap]};
   if(map[v]){const [type,n]=map[v],elite=type==='elite'||type==='boss',cap=elite?G.labOptions.eliteCap:G.labOptions.normalCap;let count=G.enemies.filter(e=>!e.dead&&!e.dying&&!!e.elite===elite).length;for(let i=0;i<n&&count<cap;i++)if(spawnEnemy(type))count++;}
   else if(v==='rune')openForge();else if(v==='cd')for(const id of ORDER)G.hero.cooldowns[id]=0;
@@ -2103,8 +2222,13 @@ function labAction(v){
   click('btnPotion',usePotion);
   click('btnStart',()=>start(0));
   click('btnLab',()=>start(0,true));
+  click('trialPanelToggle',Trial.togglePanel);
+  click('trialReset',()=>{if(G.trial)Trial.load(G.trial.id,G.trial.moving);});
+  click('trialMotion',()=>{if(G.trial)Trial.load(G.trial.id,!G.trial.moving);});
+  $('trialPreset').addEventListener('change',()=>{if(!Trial.load($('trialPreset').value,false))Trial.ui();});
+  $('trialResults').addEventListener('toggle',()=>Trial.ui());
   click('btnTitle',()=>{reset();G.lab=false;G.state='title';Sfx.suspend(false);syncUI(true);for(const id of ['ovPause','ovEnd','ovForge','labBar'])show(id,false);show('ovTitle',true);});
-  for(const [id,key,min,max] of [['labNormal','normalCap',1,200],['labElite','eliteCap',1,30],['labCD','cd',0,60]])$(id).addEventListener('change',()=>{const v=Number($(id).value);if(Number.isFinite(v))G.labOptions[key]=key==='cd'?clamp(v,min,max):Math.round(clamp(v,min,max));$(id).value=G.labOptions[key];if(key==='cd'&&G.lab)for(const k of ORDER)G.hero.cooldowns[k]=Math.min(G.hero.cooldowns[k],G.labOptions.cd);});
+  for(const [id,key,min,max] of [['labNormal','normalCap',1,200],['labElite','eliteCap',1,30],['labCD','cd',0,60]])$(id).addEventListener('change',()=>{Trial.custom();const v=Number($(id).value);if(Number.isFinite(v))G.labOptions[key]=key==='cd'?clamp(v,min,max):Math.round(clamp(v,min,max));$(id).value=G.labOptions[key];if(key==='cd'&&G.lab)for(const k of ORDER)G.hero.cooldowns[k]=Math.min(G.hero.cooldowns[k],G.labOptions.cd);});
   document.querySelectorAll('[data-lab]').forEach(b=>b.addEventListener('click',()=>{labAction(b.dataset.lab);b.blur();}));
   click('btnOathT',e=>start(Number(e.currentTarget.dataset.o)||0));
   click('btnAgain',()=>start(G.oath,G.lab));
