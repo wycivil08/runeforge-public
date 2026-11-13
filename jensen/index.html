@@ -2968,7 +2968,7 @@ const Render=(()=>{
     const hw=View.cw/(2*sc)+12,hh=View.ch/(2*sc)+12,x0=cam.x-hw,x1=cam.x+hw,y0=cam.y-hh,y1=cam.y+hh;
     screenT();g.globalAlpha=1;g.globalCompositeOperation='source-over';g.fillStyle='#040405';g.fillRect(0,0,View.cw,View.ch);
     worldT();g.lineCap='round';g.lineJoin='round';
-    World.drawGround(g,x0,y0,x1,y1);World.prewarm();drawStoryBackdrop(g,{w:World.W,h:World.H,W:World.W,H:World.H,wall:World.WALL,storyBeat:G.story.shieldReady?2:G.story.stage==="research"?0:1,epilogue:["won","win"].includes(G.state)},G.wave||1,G.rt);
+    World.drawGround(g,x0,y0,x1,y1);World.prewarm();
     drawStoryGround(g);drawCombatGround(g);
     const inView=(x,y,m)=>x>x0-m&&x<x1+m&&y>y0-m&&y<y1+m;
     if(false&&h.dead&&h.deadT>.9){const k=clamp((h.deadT-.9)/2.6,0,1);g.fillStyle='rgba(58,7,7,.72)';ell(h.x+Math.cos(h.fallAng)*12,h.y+Math.sin(h.fallAng)*12+2,27*k,17*k,h.fallAng*.3);g.fill();}
@@ -2998,7 +2998,7 @@ const Render=(()=>{
     g.fillStyle='rgba(0,0,0,.46)';ell(h.x+5,h.y+4,17,11);g.fill();list.push({y:h.y+(h.dead?-6:0),k:2,o:h});
     list.sort((a,b)=>a.y-b.y);
     for(const it of list){
-      if(it.k===0)drawStoryProp(g,it.o);
+      if(it.k===0)World.drawProp(g,it.o);
       else if(it.k===1){drawStoryPressure(g,it.o);}
       else{
         if(h.dodgeT>0){for(let i=2;i>=1;i--){g.fillStyle='rgba(96,22,24,'+(.26/i).toFixed(3)+')';ell(h.x-h.ddx*i*14,h.y-h.ddy*i*14-14,12,16);g.fill();}g.globalAlpha=.8;}
@@ -3022,19 +3022,25 @@ const Render=(()=>{
       else if(p.type==='dust'){g.fillStyle='rgba(128,114,94,'+(.17*(1-q)).toFixed(3)+')';g.beginPath();g.arc(p.x,p.y,p.size*(1+q*1.6),0,TAU);g.fill();}
     }
     const L=lctx,lw=lcv.width,lh=lcv.height,kx=lw/View.cw,ky=lh/View.ch;
-    L.setTransform(1,0,0,1,0,0);L.globalCompositeOperation='source-over';L.clearRect(0,0,lw,lh);L.fillStyle='rgba(4,4,8,.12)';L.fillRect(0,0,lw,lh);
+    L.setTransform(1,0,0,1,0,0);L.globalCompositeOperation='source-over';L.clearRect(0,0,lw,lh);L.fillStyle='rgba(4,4,8,.88)';L.fillRect(0,0,lw,lh);
     L.globalCompositeOperation='destination-out';
     const light=(wx,wy,rad,a)=>{const s=w2s(wx,wy),x=s[0]*kx,y=s[1]*ky,r=rad*sc*kx;const gr=L.createRadialGradient(x,y,0,x,y,r);
       gr.addColorStop(0,'rgba(0,0,0,'+a+')');gr.addColorStop(.4,'rgba(0,0,0,'+(a*.8).toFixed(3)+')');gr.addColorStop(1,'rgba(0,0,0,0)');L.fillStyle=gr;L.fillRect(x-r,y-r,r*2,r*2);};
     light(h.x,h.y-12,340,1);
     for(const e of G.enemies)if(e.boss&&!e.dying)light(e.x,e.y-24,170,.6);
     const braz=[];
-    for(const p of World.props)if(false&&p.type==='brazier'&&inView(p.x,p.y,240)){const fl=.93+Math.sin(G.rt*11+p.seed)*.04+Math.sin(G.rt*17.3+p.seed*3)*.03;braz.push([p,fl]);light(p.x,p.y-24,225*fl,.92);}
+    for(const p of World.props)if(p.type==='brazier'&&inView(p.x,p.y,240)){const fl=.93+Math.sin(G.rt*11+p.seed)*.04+Math.sin(G.rt*17.3+p.seed*3)*.03;braz.push([p,fl]);light(p.x,p.y-24,225*fl,.92);}
     g.setTransform(1,0,0,1,0,0);g.imageSmoothingEnabled=true;g.drawImage(lcv,0,0,cv.width,cv.height);
     worldT();g.globalCompositeOperation='lighter';
     for(const b of braz){const p=b[0],r=150*b[1];const gr=g.createRadialGradient(p.x,p.y-24,0,p.x,p.y-24,r);gr.addColorStop(0,'rgba(255,128,44,.15)');gr.addColorStop(1,'rgba(255,100,30,0)');g.fillStyle=gr;g.fillRect(p.x-r,p.y-24-r,r*2,r*2);}
     g.globalCompositeOperation='source-over';
     for(const b of braz)drawFlame(b[0].x,b[0].y-24,G.rt,b[0].seed);
+    // Ambient embers are visual only: preserve the simulation RNG and particle budget.
+    for(const [p] of braz)for(let i=0;i<3;i++){
+      const q=((G.rt+p.seed*.17+i*.37)%1.2)/1.2;
+      const x=p.x+Math.sin(p.seed+i*2.4)*6+Math.sin(G.rt*2+i)*q*7,y=p.y-26-q*38;
+      g.fillStyle='rgba(255,150,60,'+(.8*(1-q)).toFixed(3)+')';g.fillRect(x-.8,y-.8,1.6,1.6);
+    }
     g.globalCompositeOperation='lighter';
     for(const p of G.particles){
       const q=p.age/p.life;
@@ -3084,8 +3090,8 @@ const Render=(()=>{
     g.globalAlpha=1;
     const R=Math.hypot(View.cw,View.ch)/2;
     let vg=g.createRadialGradient(View.cw/2,View.ch/2,R*.45,View.cw/2,View.ch/2,R);
-    vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.22)');g.fillStyle=vg;g.fillRect(0,0,View.cw,View.ch);
-    if(false&&grainPat){g.fillStyle=grainPat;g.fillRect(0,0,View.cw,View.ch);}
+    vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.55)');g.fillStyle=vg;g.fillRect(0,0,View.cw,View.ch);
+    if(grainPat){g.fillStyle=grainPat;g.fillRect(0,0,View.cw,View.ch);}
     let red=G.hurtFx*(G.opt.shake?.34:.2);
     if(!h.dead&&h.hp<G.S.maxHp*.3&&G.state==='play')red=Math.max(red,.1+Math.sin(G.rt*4)*.05);
     if(red>.01){vg=g.createRadialGradient(View.cw/2,View.ch/2,R*.5,View.cw/2,View.ch/2,R);vg.addColorStop(0,'rgba(120,10,8,0)');vg.addColorStop(1,'rgba(140,12,8,'+red.toFixed(3)+')');g.fillStyle=vg;g.fillRect(0,0,View.cw,View.ch);}
