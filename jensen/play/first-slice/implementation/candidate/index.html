@@ -5300,7 +5300,7 @@ const R7=(()=>{
   function clearInput(){Input.reset();action=null;targetId=null;aimUsed=false;acc=0;}
   function overlay(title,text,buttons=[]){
     $('r7Modal').classList.remove('hidden');$('r7Heading').textContent=title;$('r7Text').textContent=text;
-    $('r7Art').hidden=true;$('r7Diagram').hidden=true;$('r7Alt').textContent='';imageGeneration++;
+    $('r7Art').hidden=true;$('r7Diagram').setAttribute('hidden','');$('r7Alt').textContent='';imageGeneration++;
     for(const id of ['r7Next','r7Skip','r7Previous','r7Retry','r7Reload'])$(id).hidden=!buttons.includes(id);
     for(const id of ['ovTitle','ovPause','hudR','touchUI'])$(id).inert=true;
     $('r7Heading').focus();
@@ -5334,7 +5334,7 @@ const R7=(()=>{
     if(phase==='onboarding'){
       if(!receipt){phase='blocked';overlay('Receipt unavailable','A confirmed equipment reward is required.',['r7Reload']);return;}
       overlay('GPU Knuckles · Equipment acquired','One paired GPU set. Automatic close-range hooks are faster and can contact up to three nearby opponents. Keep moving to cross the firing lanes in the real 1997 encounter. Slots 1 and 2 remain empty.',['r7Next','r7Skip']);
-      $('r7Diagram').hidden=false;$('r7Next').textContent='Enter the 1997 encounter';return;
+      $('r7Diagram').removeAttribute('hidden');$('r7Next').textContent='Enter the 1997 encounter';return;
     }
     const node=phase==='n00'?R7_STORY.n00:R7_STORY.n01,s=node[shot];
     overlay(s.period,s.caption+'\n'+s.label+(phase==='n01'?'\nEquipment already saved: GPU Knuckles.':''),['r7Next','r7Skip',...(shot?['r7Previous']:[])]);
