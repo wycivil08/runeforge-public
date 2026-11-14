@@ -405,10 +405,11 @@ body.r7 #hudL,body.r7 #hudR,body.r7 #skills,body.r7 #finaleBottom,body.r7 #chapt
 #r7Modal.story #r7Alt{position:absolute;bottom:calc(116px + var(--sb));left:5%;right:5%;text-align:center;background:#10221dbb;margin:0;padding:4px;pointer-events:none}
 #r7Modal.story #r7Buttons{position:absolute;bottom:calc(8px + var(--sb));left:max(12px,var(--sl));right:max(12px,var(--sr));justify-content:center}#r7Skip,#r7Previous{font-size:12px;padding:6px 10px;background:transparent}
 #r7Modal img[hidden],#r7Modal button[hidden]{display:none!important}#r7Diagram{display:block;width:100%;height:auto;max-height:180px;background:#15291f;border-radius:8px}#r7Diagram[hidden]{display:none}
-body.r7 #ovPause>.card>*{display:none!important}body.r7 #ovPause>.card>#btnResume,body.r7 #ovPause>.card>#btnRestartP,body.r7 #ovPause>.card>#r7Replay{display:inline-block!important;margin:8px;min-height:44px}body.r7 #ovPause>.card{width:min(480px,90vw);padding:24px}
+body.r7 #ovPause>.card>*{display:none!important}body.r7 #ovPause>.card>#btnResume,body.r7 #ovPause>.card>#btnRestartP,body.r7 #ovPause>.card>#r7Replay:not(:disabled){display:inline-block!important;margin:8px;min-height:44px}body.r7 #ovPause>.card{width:min(480px,90vw);padding:24px}
 #r8Cue{position:fixed;z-index:8;bottom:calc(12px + var(--sb));left:50%;transform:translateX(-50%);max-width:calc(100vw - 24px);width:max-content;padding:6px 10px;background:#14251ee8;color:#e6f3d5;border-radius:7px;font:13px/1.4 sans-serif;pointer-events:none}#r8Cue[hidden]{display:none}
 #r9Rotate{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:#0b1716;color:#e6efdb;text-align:center;padding:24px}#r9Rotate[hidden]{display:none}#r9Rotate button{min-height:44px}
 @media(max-height:500px){#r7Hud{padding:5px 8px;gap:8px}#r7Modal .card{padding:10px}#r7Modal.story #r7Text{font-size:16px}#r7Modal.story #r7Alt{font-size:10px;bottom:calc(104px + var(--sb))}#r7Diagram{max-height:110px}}
+body.r7 #ovPause>.card>.audioSettings{display:flex!important;justify-content:center;margin:8px}
 /* R7_CSS_END */
 
 </style>
