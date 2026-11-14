@@ -405,6 +405,7 @@ body:has(#ovTitle:not(.hidden)) #r7Hud{display:none}
 #r7Buttons{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}#r7Buttons button,#r7Replay{min-height:44px}#r7Buttons button:focus-visible{outline:3px solid #e8e7a9}
 @media(max-width:520px){#r7Hud{padding:8px;font-size:12px}#r7Hud small{font-size:11px}#r7Modal .card{padding:14px}#r7Modal img{height:34dvh}}
 #r7Diagram{display:block;width:100%;height:auto;max-height:180px;background:#15291f;border-radius:8px}#r7Diagram[hidden]{display:none}
+#r8Cue{position:fixed;z-index:8;bottom:calc(12px + var(--sb));left:50%;transform:translateX(-50%);max-width:calc(100vw - 24px);width:max-content;padding:8px 12px;border:1px solid #91bda4;border-radius:8px;background:#14251ef2;color:#e6f3d5;font:13px/1.4 sans-serif;pointer-events:none}#r8Cue[hidden]{display:none}
 /* R7_CSS_END */
 </style>
 </head>
@@ -417,6 +418,7 @@ body:has(#ovTitle:not(.hidden)) #r7Hud{display:none}
 <svg id="r7Diagram" hidden viewBox="0 0 640 145" role="img" aria-labelledby="r7DiagramTitle"><title id="r7DiagramTitle">Move close, then the GPU gauntlets alternate automatically. Only touching opponents take damage, at most three per strike.</title><g fill="none" stroke="#c7dab7" stroke-width="3"><circle cx="65" cy="64" r="20"/><path d="M95 64h62m-12-12 12 12-12 12"/><rect x="230" y="35" width="38" height="46" rx="8" fill="#508637"/><rect x="290" y="45" width="38" height="46" rx="8" fill="#508637"/><path d="M240 22q40-22 80 4m-10-10 10 10-14 4M350 64h62m-12-12 12 12-12 12"/><circle cx="470" cy="60" r="17"/><circle cx="520" cy="60" r="17"/><circle cx="570" cy="60" r="17"/></g><g fill="#edf2dd" font-size="15" font-family="sans-serif" text-anchor="middle"><text x="75" y="121">Move close</text><text x="279" y="121">Automatic L / R</text><text x="520" y="121">Up to 3 contacts</text></g></svg>
 <div id="r7Buttons"><button id="r7Previous" type="button">Previous image</button><button id="r7Next" type="button">Continue</button><button id="r7Skip" type="button">Skip</button><button id="r7Retry" type="button">Retry save</button><button id="r7Reload" type="button">Reload saved frontier</button></div>
 </div></div>
+<div id="r8Cue" role="status" aria-live="polite" hidden></div>
 <!-- R7_DOM_END -->
 
 <div id="finaleTop">
@@ -469,12 +471,12 @@ body:has(#ovTitle:not(.hidden)) #r7Hud{display:none}
   <canvas id="evolutionCanvas" width="860" height="145" aria-label="Concept reference: young waiter, founder and computing platform. System shield artwork does not indicate a new active ability."></canvas><div class="dim">Concept reference · Weak-point, module-volley and new active system-shield abilities are future concepts, not implemented.</div>
   <div class="titleActions"><button id="btnStart" class="big">Begin Experimental Campaign →</button><div class="modes"><button class="modeBtn" data-mode="kb">Keyboard + Mouse</button><button class="modeBtn" data-mode="touch">Touch</button></div></div>
   <!-- B1_APPEARANCE_TITLE_BEGIN -->
-  <label class="b1ArtControl"><input id="b1ArtTitle" type="checkbox" checked> B1 artwork preview</label>
+  <label class="b1ArtControl"><input id="b1ArtTitle" type="checkbox" checked> 餐厅美术预览</label>
   <div id="b1ArtStatus" role="status" aria-live="polite">Loading artwork; original ground remains available.</div>
-  <div id="b1Portraits" role="group" aria-label="B1 character portraits, visual preview only">
+  <div id="b1Portraits" role="group" aria-label="R8角色静态外观参考，游戏动作由程序骨架绘制">
     <figure><img id="b1Hero" hidden alt="Young restaurant worker Jensen, portrait concept" width="1254" height="1254"><figcaption>Young Jensen</figcaption><small id="b1HeroStatus">Loading portrait…</small></figure>
-    <figure><img id="b1Rusher" hidden alt="Restaurant Rusher, fictional team member portrait" width="1254" height="1254"><figcaption>Rusher</figcaption><small id="b1RusherStatus">Loading portrait…</small></figure>
-    <figure><img id="b1Foreman" hidden alt="Restaurant foreman, fictional boss portrait" width="1254" height="1254"><figcaption>Foreman</figcaption><small id="b1ForemanStatus">Loading portrait…</small></figure>
+    <figure><img id="b1Rusher" hidden alt="成年闹事顾客，深蓝便装外套与浅灰内搭；静态外观参考" width="1254" height="1254"><figcaption>闹事顾客 · 外观参考</figcaption><small id="b1RusherStatus">Loading portrait…</small></figure>
+    <figure><img id="b1Foreman" hidden alt="带头闹事的大客，宽肩、黑发后梳、酒红夹克和浅色T恤；静态外观参考" width="1254" height="1254"><figcaption>带头闹事的大客 · 外观参考</figcaption><small id="b1ForemanStatus">Loading portrait…</small></figure>
   </div>
   <div class="dim">Visual preview only · Original campaign rules and procedural bodies remain.</div>
   <!-- B1_APPEARANCE_TITLE_END -->
@@ -490,7 +492,7 @@ body:has(#ovTitle:not(.hidden)) #r7Hud{display:none}
   <div class="txt" id="pauseWhy"></div>
   <div id="pauseRunes"></div>
   <!-- B1_APPEARANCE_PAUSE_BEGIN -->
-  <label class="b1ArtControl"><input id="b1ArtPause" type="checkbox" checked> B1 artwork preview (diner floor / title portraits)</label>
+  <label class="b1ArtControl"><input id="b1ArtPause" type="checkbox" checked> 餐厅美术预览 (diner floor / title portraits)</label>
   <!-- B1_APPEARANCE_PAUSE_END -->
 
   <button id="storyRecallOpen" type="button" aria-controls="storyRecallPanel" aria-expanded="false">Read story cards</button>
@@ -537,7 +539,7 @@ body:has(#ovTitle:not(.hidden)) #r7Hud{display:none}
 <script>
 /* B1_APPEARANCE_JS_BEGIN */
 const B1Appearance=(()=>{
-  const base='../../art/b1/', floor=document.createElement('img');
+  const base='../assets/r8/', floor=document.createElement('img');
   const controls=['b1ArtTitle','b1ArtPause'].map(id=>document.getElementById(id));
   const gallery=document.getElementById('b1Portraits'),status=document.getElementById('b1ArtStatus');
   let enabled=true,ready=false,failed=false;
@@ -550,9 +552,9 @@ const B1Appearance=(()=>{
   floor.addEventListener('load',()=>{ready=floor.naturalWidth===1536&&floor.naturalHeight===1024;failed=!ready;sync();});
   floor.addEventListener('error',()=>{ready=false;failed=true;sync();});
   floor.src=base+'diner-floor-v1.png';
-  for(const [id,file] of [['b1Hero','hero-portrait-v1.png'],['b1Rusher','rusher-portrait-v2.png'],['b1Foreman','foreman-portrait-v1.png']]){
+  for(const [id,file] of [['b1Hero','hero-portrait-v1.png'],['b1Rusher','R8-NPC-customer.png'],['b1Foreman','R8-NPC-boss.png']]){
     const img=document.getElementById(id),label=document.getElementById(id+'Status');
-    img.addEventListener('load',()=>{const valid=img.naturalWidth===1254&&img.naturalHeight===1254;img.hidden=!valid;label.textContent=valid?'Portrait concept':'Portrait unavailable';});
+    img.addEventListener('load',()=>{const valid=img.naturalWidth>0&&img.naturalHeight>0;img.hidden=!valid;label.textContent=valid?'Portrait concept':'Portrait unavailable';});
     img.addEventListener('error',()=>{img.hidden=true;label.textContent='Portrait unavailable';});
     img.src=base+file;
   }
@@ -4402,7 +4404,7 @@ return Object.freeze({
     seam(g,8,0,e,0,prop==='tray'?'#c6c2ae':pal.accent,.65);
     g.restore();
   }
-  function marker(g,a,r,pal){
+  function marker(g,a,r,pal){if(a.marker==='none')return;
     const code=a.marker||'dot',x=r.bodyX-2,y=r.bodyY-3;g.save();g.translate(x,y);g.rotate(r.bodyAngle);
     if(code==='ring'||code==='orbit'||code==='rotor'){ell(g,0,0,2.1,2.1);g.strokeStyle=pal.accent;g.lineWidth=.9;g.stroke();}
     else if(code==='cross'||code==='grid'){seam(g,-2,0,2,0,pal.accent,.8);seam(g,0,-2,0,2,pal.accent,.8);}
@@ -5239,7 +5241,7 @@ function labAction(v){
   syncUI(true);
 }
 /* R7_STORY_BEGIN */
-const R7_STORY={"n00": [{"period": "Teenage years · Fictional diner challenge", "caption": "今天的空地，好像有点像赛场。", "label": "Original fictional scene", "alt": "少年双手空着放在柜台，脸与普通衬衫/围裙和参考一致；视线朝右侧开阔空间；无托盘、文字、奖励或武装。", "image": "../../art/n00/ILL-N00-01.png"}, {"period": "Teenage years · Fictional diner challenge", "caption": "领班：来，试试一场友好的挑战。", "label": "Original fictional scene", "alt": "领班短黑发胡须、深青衬衫、奶白围裙/空橙徽章；伙伴光头、细胡须山羊胡、深红衬衫，与给定头像可辨对应；两人笑着张手，完整身体和空旷通路可见。", "image": "../../art/n00/ILL-N00-02.png"}, {"period": "Teenage years · Fictional diner challenge", "caption": "空着手也能上场。那只托盘，也许能帮忙。", "label": "Original fictional scene", "alt": "画面仅一只普通矩形托盘平放在可达侧桌；少年双手空着，脸/衣着一致，全身可见，身侧通道宽敞。", "image": "../../art/n00/ILL-N00-03.png"}, {"period": "Teenage years · Fictional diner challenge", "caption": "先让他冲过去，再轮到你。", "label": "Original fictional scene", "alt": "少年屈膝分腿降低重心，两掌张开且空手，朝空地准备侧移；完整头手脚，无新增人物怪物或托盘。", "image": "../../art/n00/ILL-N00-04.png"}], "n01": [{"id": "N01-01", "caption": "先把这一班，稳稳地收好。", "label": "少年篇 · 幻想尾声", "alt": "少年系着围裙站在柜台后，双手贴在空金属托盘的两侧盘沿，暖灯照亮面孔与台面。", "period": "少年篇 · 第一章尾声", "seconds": 9, "image": "../../art/n01/ILL-N01-01.png"}, {"id": "N01-02", "caption": "有些路，一个人起不了步。\nJensen Huang · Chris Malachowsky · Curtis Priem — three co-founders.", "label": "1993 · 三人共同创立 NVIDIA / 原创重构", "alt": "三位成年创始人围着同一张大图纸讨论，中央人物执笔，另外两人观看；原创概念插画。", "period": "多年以后 · 1993", "seconds": 12, "image": "../../art/n01/ILL-N01-02.png"}, {"id": "N01-03", "caption": "新的画面，等一个敢上场的人。", "label": "1997 产品背景 · 原创意象", "alt": "成年主角托着下巴看向芯片电路展板、线框图与 CRT 屏幕；图形技术时代的原创意象。", "period": "1997 · RIVA 128 时代", "seconds": 10, "image": "../../art/n01/ILL-N01-03.png"}, {"id": "N01-04", "caption": "冠军：这次，换你选路线。", "label": "原创冠军 · 幻想竞赛", "alt": "原创街机冠军微笑伸手邀请，两侧配角与舞台装置可见；未展示主角与冠军同框。", "period": "1997 · 幻想竞技场", "seconds": 8, "image": "../../art/n01/ILL-N01-04.png"}]};
+const R7_STORY={"n00": [{"period": "少年篇 · 原创幻想", "caption": "少年黄仁勋，刚刚开始这一班。", "label": "少年篇·原创幻想；闹事与打斗不是黄仁勋真实生平事件", "alt": "少年黄仁勋穿普通衬衫和围裙，空着双手停在餐厅柜台边。", "image": "../assets/r8/R8-N00-01.png"}, {"period": "少年篇 · 原创幻想", "caption": "几名闹事顾客推开椅子，堵住了过道。", "label": "少年篇·原创幻想；闹事与打斗不是黄仁勋真实生平事件", "alt": "成年便装闹事顾客推开椅子并围堵过道；红衬衫米围裙同事向边线退让，员工不是敌人。", "image": "../assets/r8/R8-N00-02.png"}, {"period": "少年篇 · 原创幻想", "caption": "同事：先躲开冲撞，我会把托盘放到桌边。", "label": "少年篇·原创幻想；闹事与打斗不是黄仁勋真实生平事件", "alt": "青绿衬衫领班与红衬衫同事均穿米围裙，友好示意员工侧桌上的一只托盘；少年仍空手。", "image": "../assets/r8/R8-N00-03.png"}, {"period": "少年篇 · 原创幻想", "caption": "先让开冲撞。领班和同事，会在边上帮你。", "label": "少年篇·原创幻想；闹事与打斗不是黄仁勋真实生平事件", "alt": "空手少年面对便装闹事顾客；后方宽肩黑后梳大客穿酒红夹克浅色T恤。员工留在边线，不是战斗目标。", "image": "../assets/r8/R8-N00-04.png"}], "n01": [{"id": "N01-01", "caption": "这一班，大家一起守住了。", "label": "少年篇 · 幻想尾声", "alt": "少年系着围裙站在柜台后，双手贴在空金属托盘的两侧盘沿，暖灯照亮面孔与台面。", "period": "少年篇 · 第一章尾声", "seconds": 9, "image": "../assets/r8/ILL-N01-01.png"}, {"id": "N01-02", "caption": "有些路，一个人起不了步。\nJensen Huang · Chris Malachowsky · Curtis Priem — three co-founders.", "label": "1993 · 三人共同创立 NVIDIA / 原创重构", "alt": "三位成年创始人围着同一张大图纸讨论，中央人物执笔，另外两人观看；原创概念插画。", "period": "多年以后 · 1993", "seconds": 12, "image": "../assets/r8/ILL-N01-02.png"}, {"id": "N01-03", "caption": "新的画面，等一个敢上场的人。", "label": "1997 产品背景 · 原创意象", "alt": "成年主角托着下巴看向芯片电路展板、线框图与 CRT 屏幕；图形技术时代的原创意象。", "period": "1997 · RIVA 128 时代", "seconds": 10, "image": "../assets/r8/ILL-N01-03.png"}, {"id": "N01-04", "caption": "冠军：这次，换你选路线。", "label": "原创冠军 · 幻想竞赛", "alt": "原创街机冠军微笑伸手邀请，两侧配角与舞台装置可见；未展示主角与冠军同框。", "period": "1997 · 幻想竞技场", "seconds": 8, "image": "../assets/r8/ILL-N01-04.png"}]};
 /* R7_STORY_END */
 /* R7_STORE_BEGIN */
 const R7Store=(()=>{
@@ -5289,7 +5291,7 @@ const R7Store=(()=>{
 /* R7_RUNTIME_BEGIN */
 const R7=(()=>{
   const FIXED=1/120,profiles={bare:{damage:8,cycle:.7,reach:30,cap:1,radius:7},tray:{damage:12,cycle:.7,reach:45,cap:3,radius:14},gpu:{damage:12,cycle:.36,reach:45,cap:3,radius:9}};
-  let profile=null,store=null,phase='title',level=1,clock=0,acc=0,attempt=0,seq=0,hand=0,action=null,nextAttack=0,targetId=null,aimUsed=false,tray=false,pickups=[],hazards=[],receipt=null,pending=null,busy=false,shot=0,replay=false,imageGeneration=0,lastError='',contacts=0;
+  let profile=null,store=null,phase='title',level=1,clock=0,acc=0,attempt=0,seq=0,hand=0,action=null,nextAttack=0,targetId=null,aimUsed=false,tray=false,pickups=[],allies=[],offers=[],hazards=[],receipt=null,pending=null,busy=false,shot=0,replay=false,imageGeneration=0,lastError='',contacts=0;
   const live=()=>phase==='combat'&&!G.paused&&!document.hidden&&!G.hero.dead;
   const current=()=>profile?.frontier===2?profiles.gpu:tray?profiles.tray:profiles.bare;
   const copy=R7Store.clone;
@@ -5302,10 +5304,10 @@ const R7=(()=>{
     $('r7Modal').classList.remove('hidden');$('r7Heading').textContent=title;$('r7Text').textContent=text;
     $('r7Art').hidden=true;$('r7Diagram').setAttribute('hidden','');$('r7Alt').textContent='';imageGeneration++;
     for(const id of ['r7Next','r7Skip','r7Previous','r7Retry','r7Reload'])$(id).hidden=!buttons.includes(id);
-    for(const id of ['ovTitle','ovPause','hudR','touchUI'])$(id).inert=true;
+    for(const id of ['ovTitle','ovPause','hudR','touchUI','game'])$(id).inert=true;
     $('r7Heading').focus();
   }
-  function closeModal(){for(const id of ['ovTitle','ovPause','hudR','touchUI'])$(id).inert=false;$('r7Modal').classList.add('hidden');imageGeneration++;clearInput();if(phase==='combat')$('game').focus();}
+  function closeModal(){for(const id of ['ovTitle','ovPause','hudR','touchUI','game'])$(id).inert=false;$('r7Modal').classList.add('hidden');imageGeneration++;clearInput();if(phase==='combat')$('game').focus();}
   async function persist(next,after){
     if(busy)return;busy=true;pending={next:copy(next),after};clearInput();G.state='r7-save';phase='saving';
     overlay('Saving progress…','Please keep this page open.');
@@ -5340,28 +5342,33 @@ const R7=(()=>{
     overlay(s.period,s.caption+'\n'+s.label+(phase==='n01'?'\nEquipment already saved: GPU Knuckles.':''),['r7Next','r7Skip',...(shot?['r7Previous']:[])]);
     $('r7Next').textContent=shot===3?(phase==='n00'?'Enter the diner':'See the equipment hint'):'Continue';
     const image=$('r7Art'),generation=++imageGeneration;
-    $('r7Alt').textContent=s.alt+' · Illustration loading; continue or skip at any time.';image.alt=s.alt;
+    $('r7Alt').textContent=s.alt+' · 载入中，可继续或跳过。';image.alt=s.alt;
     image.onload=()=>{if(generation!==imageGeneration)return;image.hidden=false;$('r7Alt').textContent=s.label;};
     image.onerror=()=>{if(generation!==imageGeneration)return;image.hidden=true;$('r7Alt').textContent=s.alt+' · Image unavailable; continue or skip.';};
     image.src=s.image;
   }
   function next(skip=false){
     if(busy||!['n00','n01','onboarding'].includes(phase))return;
-    if(replay){if(skip||shot===3){replay=false;phase='combat';closeModal();G.paused=true;show('ovPause',true);G.state='play';return;}shot++;showStory();return;}
+    if(replay){if(skip||shot===3){replay=false;phase='combat';closeModal();pause(true);G.state='play';return;}shot++;showStory();return;}
     if(phase==='onboarding'){changePhase('combat2');return;}
     if(skip||shot===3)changePhase(phase==='n00'?'combat1':'onboarding');else changePhase(phase,shot+1);
   }
-  function actor(id,role,x,y,hp){return {id,r7:true,role,x,y,r:role==='foreman'?20:role==='champion'?24:16,hp,maxHp:hp,scale:role==='foreman'?1.25:1,state:'chase',t:0,wait:1+id*.27,face:Math.PI/2,walk:0,moveAmt:0,flash:0,jz:0,dead:false,dying:false,retire:0,attack:null,entered:true};}
+  function actor(id,role,x,y,hp){return {id,r7:true,role,x,y,r:role==='troublemaker_boss'?20:role==='champion'?24:16,hp,maxHp:hp,scale:role==='troublemaker_boss'?1.25:1,state:'chase',t:0,wait:1+id*.27,face:Math.PI/2,walk:0,moveAmt:0,flash:0,jz:0,dead:false,dying:false,retire:0,attack:null,entered:true};}
   function enter(n){
     reset();level=n;phase='combat';G.state='play';G.wave=n;G.growth.chapterId=n===1?'diner':'arcade';G.hero.hp=G.hero.hpLag=100;G.hero.dead=false;
     G.hero.x=720;G.hero.y=n===1?620:680;World.collide(G.hero,G.hero.r);G.cam.x=G.hero.x;G.cam.y=G.hero.y;
     attempt++;clock=0;acc=0;seq=0;hand=0;nextAttack=.3;tray=false;action=null;hazards=[];contacts=0;clearInput();
     pickups=n===1?[{x:620,y:610,taken:false,visible:false},{x:840,y:430,taken:false,visible:false}]:[];
-    G.enemies=n===1?[actor(1,'rusher',620,460,32),actor(2,'rusher',850,480,32),actor(3,'rusher',600,330,32),actor(4,'foreman',820,260,88)]:[actor(1,'champion',720,260,180),actor(2,'gunner',480,370,60),actor(3,'gunner',960,370,60),actor(4,'rusher',600,530,48),actor(5,'rusher',840,500,48)];
-    if(n===1)G.enemies.find(e=>e.role==='foreman').entered=false;
+    G.enemies=n===1?[actor(1,'troublemaker_customer',620,460,32),actor(2,'troublemaker_customer',850,480,32),actor(3,'troublemaker_customer',600,330,32),actor(4,'troublemaker_boss',820,260,88)]:[actor(1,'champion',720,260,180),actor(2,'gunner',480,370,60),actor(3,'gunner',960,370,60),actor(4,'rusher',600,530,48),actor(5,'rusher',840,500,48)];
+    offers=[];allies=n===1?[{id:'ally_coworker',role:'support_only',label:'同事·援手',x:540,y:650,color:'#a04945',until:0,target:0},{id:'ally_foreman',role:'support_only',label:'领班·援手',x:935,y:440,color:'#467b75',until:0,target:1}]:[];
+    if(n===1)G.enemies.find(e=>e.role==='troublemaker_boss').entered=false;
     for(const e of G.enemies)World.collide(e,e.r);
     for(const p of pickups){if(!World.walkable(p.x,p.y,18))throw Error('Tray position is not walkable.');}
     for(const id of ['ovTitle','ovPause','ovEnd','ovChapter','ovForge','bossHud'])show(id,false);closeModal();ui();
+  }
+  function offer(index){
+    if(level!==1||offers.includes(index))return;offers.push(index);
+    const p=pickups[index],ally=allies[index];p.visible=true;p.disabled=tray;ally.until=clock+2.2;
   }
   function move(o,dx,dy){const n=Math.max(1,Math.ceil(Math.hypot(dx,dy)/6));for(let i=0;i<n;i++){o.x+=dx/n;o.y+=dy/n;for(let pass=0;pass<2;pass++){World.collide(o,o.r);for(const b of [G.hero,...G.enemies]){if(b===o||b.dead||b.hp<=0||b.entered===false)continue;const x=o.x-b.x,y=o.y-b.y,d=Math.hypot(x,y),min=o.r+b.r;if(d<min){const nx=d>.001?x/d:1,ny=d>.001?y/d:0;o.x+=nx*(min-d);o.y+=ny*(min-d);}}}World.collide(o,o.r);}}
   function visible(a,b){return World.clearSegment(a.x,a.y,b.x,b.y,2);}
@@ -5369,7 +5376,7 @@ const R7=(()=>{
   function hit(e,root,point){
     if(e.dead||e.hp<=0||root.hits.has(e.id)||root.hits.size>=root.profile.cap)return;
     root.hits.add(e.id);e.hp=Math.max(0,e.hp-root.profile.damage);e.flash=.16;contacts++;G.kills+=e.hp===0?1:0;
-    if(e.hp===0){if(level===1&&e.id===1&&!tray)pickups[0].visible=true;e.state='retiring';e.retire=.5;e.attack=null;}
+    if(e.hp===0){if(level===1&&e.id===1)offer(0);e.state='retiring';e.retire=.5;e.attack=null;}
     if(Sfx.hit)Sfx.hit();
   }
   function handPoint(h,a,t){
@@ -5401,13 +5408,13 @@ const R7=(()=>{
     const h=G.hero,dx=h.x-e.x,dy=h.y-e.y,d=Math.hypot(dx,dy)||1;e.wait-=dt;
     if(e.state==='chase'){
       e.face=Math.atan2(dy,dx);
-      if(e.role==='rusher'||e.role==='foreman'){if(d>90){move(e,dx/d*70*dt,dy/d*70*dt);e.walk+=dt*10;e.moveAmt=1;}else e.moveAmt=0;}
+      if(e.role==='rusher'||e.role==='troublemaker_customer'||e.role==='troublemaker_boss'){if(d>90){move(e,dx/d*70*dt,dy/d*70*dt);e.walk+=dt*10;e.moveAmt=1;}else e.moveAmt=0;}
       if(e.wait<=0&&(d<230||e.role==='gunner'||e.role==='champion')&&visible(e,h)){
         const active=G.enemies.filter(x=>['tell','active'].includes(x.state)).length;
-        if(active<2){e.state='tell';e.t=e.role==='champion'?1.15:.85;e.attack={angle:e.face,hit:false,id:attempt+':enemy:'+e.id+':'+(++seq)};e.moveAmt=0;}
+        if(active<2){e.state='tell';e.t=e.role==='champion'?1.15:e.role==='troublemaker_boss'?1.1:.85;e.attack={angle:e.face,hit:false,id:attempt+':enemy:'+e.id+':'+(++seq)};e.moveAmt=0;}
       }
     }else if(e.state==='tell'){
-      e.t-=dt;if(e.t<=0){e.state='active';e.t=e.role==='foreman'?.38:.3;
+      e.t-=dt;if(e.t<=0){e.state='active';e.t=e.role==='troublemaker_boss'?.38:.3;
         if(e.role==='gunner'||e.role==='champion'){
           const a=e.attack.angle;
           hazards.push({id:e.attack.id,kind:e.role==='champion'?'beam':'bullet',x:e.x,y:e.y,angle:a,v:300,r:e.role==='champion'?9:5,life:e.role==='champion'?.45:2.6,damage:e.role==='champion'?18:10,hit:false});e.state='recover';e.t=.8;
@@ -5415,9 +5422,9 @@ const R7=(()=>{
       }
     }else if(e.state==='active'){
       const ox=e.x,oy=e.y,a=e.attack.angle;move(e,Math.cos(a)*280*dt,Math.sin(a)*280*dt);e.t-=dt;
-      if(!e.attack.hit&&segmentCircleT(ox-h.oldX,oy-h.oldY,e.x-h.x,e.y-h.y,0,0,e.r+h.r)!==Infinity){e.attack.hit=true;hurt(e.role==='foreman'?18:10);e.t=0;}
-      if(e.t<=0||Math.hypot(e.x-ox,e.y-oy)<dt*50){e.state='recover';e.t=e.role==='foreman'?1.3:1;}
-    }else if(e.state==='recover'){e.t-=dt;if(e.t<=0){if(level===1&&e.id===1)pickups[0].visible=true;e.state='chase';e.wait=.6;}}
+      if(!e.attack.hit&&segmentCircleT(ox-h.oldX,oy-h.oldY,e.x-h.x,e.y-h.y,0,0,e.r+h.r)!==Infinity){e.attack.hit=true;hurt(e.role==='troublemaker_boss'?18:10);e.t=0;}
+      if(e.t<=0||Math.hypot(e.x-ox,e.y-oy)<dt*50){e.state='recover';e.t=e.role==='troublemaker_boss'?1.3:1;}
+    }else if(e.state==='recover'){e.t-=dt;if(e.t<=0){if(level===1&&e.id===1)offer(0);e.state='chase';e.wait=.6;}}
   }
   function beamEnd(p){const dx=Math.cos(p.angle),dy=Math.sin(p.angle);let len=650;for(const [v,d,max] of [[p.x,dx,World.W-World.WALL],[p.y,dy,World.H-World.WALL]])if(Math.abs(d)>.0001)len=Math.min(len,((d>0?max:World.WALL)-v)/d);const ex=p.x+dx*len,ey=p.y+dy*len;for(const o of World.props){const t=segmentCircleT(p.x,p.y,ex,ey,o.x,o.y,o.r+p.r);if(t!==Infinity)len=Math.min(len,Math.hypot(ex-p.x,ey-p.y)*t);}return {x:p.x+dx*len,y:p.y+dy*len};}
   function fixed(dt){
@@ -5426,9 +5433,9 @@ const R7=(()=>{
     h.vx=c.mx*CFG.hero.speed;h.vy=c.my*CFG.hero.speed;h.moveAmt=Math.hypot(c.mx,c.my);h.walk+=h.moveAmt*dt*12;h.hurtT=Math.max(0,h.hurtT-dt);
     if(h.moveAmt&&!action)h.bodyAng=Math.atan2(c.my,c.mx);
     h.headAng=h.bodyAng;h.aim=h.bodyAng;
-    for(const p of pickups)if(p.visible&&!p.taken&&!tray&&Math.hypot(h.x-p.x,h.y-p.y)<h.r+16){p.taken=true;tray=true;action=null;nextAttack=Math.max(nextAttack,clock+.1);}
+    for(const p of pickups)if(p.visible&&!p.taken&&!tray&&Math.hypot(h.x-p.x,h.y-p.y)<h.r+16){p.taken=true;tray=true;for(const other of pickups)if(!other.taken)other.disabled=true;action=null;nextAttack=Math.max(nextAttack,clock+.1);}
     for(const e of G.enemies){e.oldX=e.x;e.oldY=e.y;enemyStep(e,dt);}
-    if(level===1&&G.enemies.filter(e=>e.role==='rusher').every(e=>e.dead)){G.enemies.find(e=>e.role==='foreman').entered=true;pickups[1].visible=true;}
+    if(level===1&&G.enemies.slice(0,3).every(e=>e.dead)){const boss=G.enemies[3];if(!boss.entered){boss.entered=true;offer(1);}}
     auto(dt,c);
     hazards=hazards.filter(p=>{
       if(p.kind==='beam'){const end=beamEnd(p);if(!p.hit&&segDist(h.x,h.y,p.x,p.y,end.x,end.y).d<=h.r+p.r){p.hit=true;hurt(p.damage);}p.life-=dt;return p.life>0;}
@@ -5450,6 +5457,8 @@ const R7=(()=>{
   }
   function pause(value,auto=false){
     if(phase!=='combat')return;G.paused=value;clearInput();Sfx.suspend(value);show('ovPause',value);
+    for(const id of ['game','hudR','touchUI'])$(id).inert=value;
+    $(value?'btnResume':'game').focus();
     $('pauseWhy').textContent=auto?'Paused on focus loss.':'Paused';$('pauseRunes').textContent='Move freely. Attacks happen automatically on close contact. Slots 1 and 2 are empty in this slice.';
   }
   function key(c){
@@ -5461,8 +5470,9 @@ const R7=(()=>{
   function ui(){
     $('r7Health').textContent='HP '+Math.ceil(G.hero?.hp||0)+' / 100 · '+G.enemies.filter(e=>!e.dead).length+' opponents';$('r7Replay').disabled=!profile?.receipt;$('hpTxt').textContent=Math.ceil(G.hero?.hp||0)+'/100';$('hpFill').style.width=(G.hero?.hp||0)+'%';$('hpLag').style.width=(G.hero?.hp||0)+'%';
     $('waveTxt').textContent=level===1?'Diner · 1':'Arcade · 2';$('foes').textContent=G.enemies.filter(e=>!e.dead).length;$('kills').textContent=G.kills;
+    const provider=allies.findLast(a=>a.until>clock);$('r8Cue').textContent=provider?(provider.target===0?'同事·援手：托盘放这儿，顺路就拿！':'领班·援手：这里还有托盘，先看清他冲哪边！')+(tray?'（已持托盘，无需再拾）':''):'';$('r8Cue').hidden=!provider||phase!=='combat';
     $('r7Kit').textContent=profile?.frontier===2?'GPU Knuckles · automatic':tray?'Tray sweep · temporary':'Bare hands · automatic';
-    $('r7Status').textContent=phase==='combat'?(level===1?'Move to dodge locked charges. Trays appear after the first charge and before the foreman.':'Cross the marked lanes sideways. Close in for GPU contact.'):'First playable slice · fictional challenges';
+    $('r7Status').textContent=phase==='combat'?(level===1?'少年篇·原创幻想。侧移躲冲撞，领班与同事会提供托盘。':'Cross the marked lanes sideways. Close in for GPU contact.'):'First playable slice · fictional challenges';
   }
   function drawHero(ctx,h){
     const a=action,p=current(),angle=a?a.angle:h.bodyAng,pose={tw:0,hip:0,sa:0,hr:12,ha:0,ld:0,cr:h.dead?.45:0};
@@ -5475,19 +5485,38 @@ const R7=(()=>{
     else if(profile?.frontier===2){ctx.fillStyle='#89c953';ctx.fillRect(-8,-7,16,14);ctx.strokeStyle='#d2f6aa';ctx.strokeRect(-8,-7,16,14);const other=activeHand==='left'?rig.right:rig.left;ctx.restore();ctx.save();ctx.fillStyle='#89c953';ctx.fillRect(other.handX-6,other.handY-6,12,12);}
     else{ctx.fillStyle='#e3bf93';ctx.beginPath();ctx.arc(0,0,7,0,TAU);ctx.fill();}
     ctx.restore();
+    if(level===1){ctx.save();ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillStyle='#e4f2bb';ctx.fillText('Jensen · 少年',h.x,h.y-47);ctx.restore();}
   }
   function drawEnemy(ctx,e){
     if(e.dead||!e.entered)return;
-    const appearance={outfit:'shirt',hairStyle:e.role==='rusher'?'cropped':'swept',skin:'#bca184',cloth:'hem',palette:{cloth:e.role==='foreman'?'#467b75':e.role==='rusher'?'#a04945':'#536caf',light:'#d5c6a0',dark:'#252f30',accent:'#e3aa4b',metal:'#9fa6a4'},prop:'none'};
+    const boss=e.role==='troublemaker_boss',customer=e.role==='troublemaker_customer',diner=boss||customer;
+    const appearance={marker:diner?'none':undefined,outfit:diner?'bomber':'shirt',hairStyle:boss?'swept':customer||e.role==='rusher'?'cropped':'swept',hairColor:diner?'#181b1c':'#5a5147',faceShape:boss?'square':'oval',skin:'#bca184',cloth:'hem',palette:{cloth:boss?'#672d3c':customer?['#304459','#41464c','#566044'][e.id-1]:e.role==='rusher'?'#a04945':'#536caf',light:diner?'#d5d3cb':'#d5c6a0',dark:'#252f30',accent:diner?'#88897f':'#e3aa4b',metal:'#9fa6a4'},prop:'none'};
+    const recovering=boss&&e.state==='recover',telling=boss&&e.state==='tell';
+    const pose={tw:0,hip:0,sa:0,hr:14,ha:0,ld:e.state==='active'?(boss?10:5):telling?-7:recovering?6+Math.sin(clock*8)*.6:0,cr:recovering?.45+Math.sin(clock*8)*.025:telling?.2:e.state==='tell'?.25:0};
+    const snapshot={x:0,y:0,bodyAng:e.face,headAng:e.face,walk:telling?Math.PI/2:e.walk,moveAmt:telling?.65:e.moveAmt,pose,hurtT:e.flash,time:G.t};
     ctx.save();ctx.globalAlpha=e.hp<=0?Math.max(0,e.retire/.5):1;
-    CharacterRenderer.drawCharacter(ctx,{x:e.x,y:e.y,bodyAng:e.face,headAng:e.face,walk:e.walk,moveAmt:e.moveAmt,pose:{tw:0,hip:0,sa:0,hr:14,ha:0,ld:e.state==='active'?5:0,cr:e.state==='tell'?.25:0},hurtT:e.flash,time:G.t},appearance,{shadow:false,drawProp:false});
+    ctx.save();ctx.translate(e.x,e.y);ctx.scale(e.scale*(boss?1.12:1),e.scale);CharacterRenderer.drawCharacter(ctx,snapshot,appearance,{shadow:false,drawProp:false});ctx.restore();
     if(e.role==='champion'){ctx.strokeStyle='#8df1e5';ctx.lineWidth=4;ctx.strokeRect(e.x-27,e.y-30,54,32);}
-    ctx.fillStyle='#e2eed8';ctx.font='11px sans-serif';ctx.textAlign='center';ctx.fillText(e.role,e.x,e.y-46);ctx.fillStyle='#26312b';ctx.fillRect(e.x-22,e.y-40,44,4);ctx.fillStyle=e.flash?'#fff1a8':'#e9ad6b';ctx.fillRect(e.x-22,e.y-40,44*Math.max(0,e.hp/e.maxHp),4);ctx.restore();
+    ctx.fillStyle='#e2eed8';ctx.font='11px sans-serif';ctx.textAlign='center';ctx.fillText(boss?'带头闹事的大客':customer?'闹事顾客':e.role,e.x,e.y-(boss?64:46));
+    if(boss&&['tell','active','recover'].includes(e.state)){ctx.fillStyle='#ffe3a1';ctx.fillText(telling?'蓄力 · 侧移':recovering?'喘气 · 反击':'重冲撞',e.x,e.y+22);}
+    ctx.fillStyle='#26312b';ctx.fillRect(e.x-22,e.y-40,44,4);ctx.fillStyle=e.flash?'#fff1a8':'#e9ad6b';ctx.fillRect(e.x-22,e.y-40,44*Math.max(0,e.hp/e.maxHp),4);ctx.restore();
+  }
+  function drawSupport(ctx){
+    for(const ally of allies){
+      const p=pickups[ally.target],pointing=ally.until>clock,angle=Math.atan2(p.y-ally.y,p.x-ally.x);
+      const s={x:ally.x,y:ally.y,bodyAng:angle,headAng:angle,walk:0,moveAmt:0,pose:{tw:0,hip:0,sa:0,hr:10,ha:0,ld:0,cr:0},time:G.t};
+      if(pointing)s.prototypeHands={left:{x:ally.x+Math.cos(angle)*30,y:ally.y-17+Math.sin(angle)*30}};
+      const appearance={outfit:'apron',cloth:'apron',hairStyle:'receding',hairColor:ally.target?'#43372e':'#bca184',skin:'#bca184',palette:{cloth:ally.color,light:'#d5c6a0',dark:'#293331',accent:'#e3d5b4',metal:'#9fa6a4'},prop:'none'};
+      ctx.save();CharacterRenderer.drawCharacter(ctx,s,appearance,{shadow:false,drawProp:false});
+      if(ally.target){const rig=CharacterRenderer.computeRig(s);ctx.save();ctx.translate(rig.headX,rig.headY);ctx.rotate(angle);ctx.fillStyle='#43372e';ctx.beginPath();ctx.ellipse(5,0,3,5,0,0,TAU);ctx.fill();ctx.restore();}
+      ctx.fillStyle='#bfe9d3';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText(ally.label,ally.x,ally.y-46);ctx.restore();
+    }
   }
   function ground(ctx){
-    if(level===1){ctx.save();ctx.fillStyle='#394d43';ctx.fillRect(0,0,World.W,World.H);for(let y=World.WALL;y<World.H-World.WALL;y+=84)for(let x=World.WALL;x<World.W-World.WALL;x+=84){ctx.fillStyle=(Math.floor(x/84)+Math.floor(y/84))%2?'#455347':'#5b5e4f';ctx.fillRect(x,y,Math.min(84,World.W-World.WALL-x),Math.min(84,World.H-World.WALL-y));}B1Appearance.drawFloor(ctx,World.W,World.H,World.WALL);ctx.strokeStyle='#a68458';ctx.lineWidth=World.WALL;ctx.strokeRect(World.WALL/2,World.WALL/2,World.W-World.WALL,World.H-World.WALL);ctx.fillStyle='#d2c297';ctx.font='bold 26px sans-serif';ctx.textAlign='center';ctx.fillText('DINER · FRIENDLY CHALLENGE',720,180);ctx.restore();}
+    if(level===1){ctx.save();ctx.fillStyle='#394d43';ctx.fillRect(0,0,World.W,World.H);for(let y=World.WALL;y<World.H-World.WALL;y+=84)for(let x=World.WALL;x<World.W-World.WALL;x+=84){ctx.fillStyle=(Math.floor(x/84)+Math.floor(y/84))%2?'#455347':'#5b5e4f';ctx.fillRect(x,y,Math.min(84,World.W-World.WALL-x),Math.min(84,World.H-World.WALL-y));}B1Appearance.drawFloor(ctx,World.W,World.H,World.WALL);ctx.strokeStyle='#a68458';ctx.lineWidth=World.WALL;ctx.strokeRect(World.WALL/2,World.WALL/2,World.W-World.WALL,World.H-World.WALL);ctx.fillStyle='#d2c297';ctx.font='bold 26px sans-serif';ctx.textAlign='center';ctx.fillText('DINER · 守住这一班',720,180);ctx.restore();}
     else{ctx.save();ctx.fillStyle='rgba(18,38,60,.8)';ctx.fillRect(45,45,World.W-90,World.H-90);ctx.strokeStyle='#426c87';ctx.lineWidth=1;for(let x=80;x<World.W;x+=80){ctx.beginPath();ctx.moveTo(x,45);ctx.lineTo(x,World.H-45);ctx.stroke();}ctx.restore();}
-    for(const p of pickups)if(p.visible&&!p.taken){ctx.save();ctx.fillStyle='#d3d8cd';ctx.strokeStyle='#e7d17b';ctx.lineWidth=2;ctx.fillRect(p.x-15,p.y-10,30,20);ctx.strokeRect(p.x-15,p.y-10,30,20);ctx.fillStyle='#fff1ba';ctx.font='11px sans-serif';ctx.textAlign='center';ctx.fillText('TRAY · walk to pick up',p.x,p.y-18);ctx.restore();}
+    drawSupport(ctx);
+    for(const p of pickups)if(p.visible&&!p.taken){ctx.save();ctx.globalAlpha=p.disabled?.45:1;ctx.fillStyle='#d3d8cd';ctx.strokeStyle='#e7d17b';ctx.lineWidth=2;ctx.fillRect(p.x-15,p.y-10,30,20);ctx.strokeRect(p.x-15,p.y-10,30,20);ctx.fillStyle='#fff1ba';ctx.font='11px sans-serif';ctx.textAlign='center';ctx.fillText(p.disabled?'已持托盘 · 无需再拾':'托盘 · 走近拾取',p.x,p.y-18);ctx.restore();}
     for(const e of G.enemies)if(e.entered&&e.hp>0&&e.state==='tell'){const a=e.attack.angle,len=e.role==='gunner'||e.role==='champion'?650:140;ctx.save();ctx.strokeStyle='#f4bc63';ctx.lineWidth=e.role==='champion'?20:8;ctx.globalAlpha=.5;ctx.beginPath();ctx.moveTo(e.x,e.y);ctx.lineTo(e.x+Math.cos(a)*len,e.y+Math.sin(a)*len);ctx.stroke();ctx.restore();}
     for(const p of hazards){ctx.save();ctx.fillStyle='#ffcf76';ctx.strokeStyle='#ffcf76';if(p.kind==='beam'){const end=beamEnd(p);ctx.lineWidth=p.r*2;ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(end.x,end.y);ctx.stroke();ctx.lineWidth=3;ctx.strokeStyle='#fff9dc';ctx.stroke();}else{ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,TAU);ctx.fill();}ctx.restore();}
   }
@@ -5496,20 +5525,21 @@ const R7=(()=>{
   function mount(){
     document.body.classList.add('r7');$('game').tabIndex=0;$('btnStart').textContent='Begin / resume first playable slice';
     document.querySelector('#ovTitle h1').textContent='From the Diner to the Next Beginning';
-    document.querySelector('.titleLead').textContent='A short playable journey: diner challenge, one permanent GPU upgrade, then a real arcade encounter.';
-    document.querySelector('.titleNotice').textContent='Fictional friendly challenges. Illustrations are original scenes, not historical photographs. This candidate covers the diner and the arcade only.';
+    document.querySelector('.titleLead').textContent='少年空手面对闹事顾客，领班和同事提供援手；过关获得一套永久 GPU 装备，再进入街机战。';
+    document.querySelector('.titleNotice').textContent='少年篇·原创幻想；闹事与打斗不是黄仁勋真实生平事件。插图为原创场景。本候选包含餐厅与街机两关。';
     document.querySelector('.quickControls').textContent='WASD / arrows or left touch stick to move. Close-range attacks are automatic. Move sideways to dodge. Slots 1 and 2 are empty. P pauses.';
-    $('prototypeLabel').textContent='R7 first slice · Fictional challenges · Gameplay and art candidate';
+    $('prototypeLabel').textContent='R8 · 少年篇原创幻想 · 闹事顾客与同事援手';
     $('r7Next').addEventListener('click',()=>next());$('r7Skip').addEventListener('click',()=>next(true));
     $('r7Previous').addEventListener('click',()=>{if(busy||shot<=0)return;if(replay){shot--;showStory();}else changePhase(phase,shot-1);});
     $('r7Retry').addEventListener('click',()=>{if(pending&&!busy)persist(pending.next,pending.after);});$('r7Reload').addEventListener('click',()=>start());
     $('r7Replay').addEventListener('click',()=>{if(!profile?.receipt||phase!=='combat')return;replay=true;phase='n01';shot=0;show('ovPause',false);showStory();});
+    $('ovPause').addEventListener('keydown',e=>{if(e.key!=='Tab'||!G.paused||phase!=='combat')return;const buttons=[...$('ovPause').querySelectorAll('button,input,[tabindex]')].filter(b=>!b.disabled&&!b.hidden&&b.offsetParent!==null);const first=buttons[0],last=buttons[buttons.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}});
     $('game').addEventListener('pointermove',()=>{if(Input.st.mode==='kb')aimUsed=true;});
     addEventListener('storage',e=>{if(e.key===R7Store.KEY&&phase!=='title'){clearInput();G.paused=true;phase='blocked';G.state='r7-blocked';overlay('Saved career changed','Another page changed this career. Reload to continue from the saved frontier.',['r7Reload']);}});
     $('r7Modal').addEventListener('keydown',e=>{if(e.key!=='Tab')return;const buttons=['r7Previous','r7Next','r7Skip','r7Retry','r7Reload'].map(id=>$(id)).filter(b=>!b.hidden&&!b.disabled);if(!buttons.length){e.preventDefault();$('r7Heading').focus();return;}const first=buttons[0],last=buttons[buttons.length-1];if(e.shiftKey&&(document.activeElement===first||document.activeElement===$('r7Heading'))){e.preventDefault();last.focus();}else if(!e.shiftKey&&(document.activeElement===last||document.activeElement===$('r7Heading'))){e.preventDefault();first.focus();}});
     ui();
   }
-  return Object.freeze({enabled:true,start,update,pause,key,ui,drawHero,drawEnemy,ground,drawProp,home,mount,inspect:()=>({phase,level,clock,attempt,action:action?{...action,hits:[...action.hits]}:null,tray,pickups:copy(pickups),hazards:copy(hazards),profile:profile?copy(profile):null,receipt,contacts,lastError,busy}),retry:()=>pending&&!busy?persist(pending.next,pending.after):null});
+  return Object.freeze({enabled:true,start,update,pause,key,ui,drawHero,drawEnemy,ground,drawProp,home,mount,inspect:()=>({phase,level,clock,attempt,action:action?{...action,hits:[...action.hits]}:null,tray,pickups:copy(pickups),allies:copy(allies),offers:copy(offers),hazards:copy(hazards),profile:profile?copy(profile):null,receipt,contacts,lastError,busy}),retry:()=>pending&&!busy?persist(pending.next,pending.after):null});
 })();
 /* R7_RUNTIME_END */
 
